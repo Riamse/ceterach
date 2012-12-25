@@ -49,7 +49,7 @@ def_config = {"throttle": 0,
 
 class MediaWiki:
 
-    _tokens = DictThatReturnsNoneInsteadOfRaisingKeyError
+    _tokens = DictThatReturnsNoneInsteadOfRaisingKeyError()
     _namespaces = None
 
     def __init__(self, api_url="http://en.wikipedia.org/w/api.php", config=None):
