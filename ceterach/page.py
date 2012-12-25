@@ -1,13 +1,11 @@
 #!/usr/bin/python3
-# -*- coding: utf-8 -*-
 #-------------------------------------------------------------------------------
 # This file is part of Ceterach.
 # Copyright (C) 2012 Andrew Wang <andrewwang43@gmail.com>
-# Copyright (C) 2012 Kunal Mehta <legoktm@gmail.com>
 #
 # Ceterach is free software; you can redistribute it and/or modify it under
 # the terms of the GNU Lesser General Public License as published by the Free
-# Software Foundation; either version 2.1 of the License, or (at your option)
+# Software Foundation; either version 3 of the License, or (at your option)
 # any later version.
 #
 # Ceterach is distributed in the hope that it will be useful, but WITHOUT ANY
@@ -20,7 +18,7 @@
 #-------------------------------------------------------------------------------
 
 import re
-import hashlib
+from hashlib import md5
 from datetime import datetime
 from time import strftime, gmtime
 
@@ -71,15 +69,14 @@ class Page:
         a single API query will be made.
 
         :type res: dict
-        :param res: The result of an earlier API request (optional).
-
-                    If you are planning
-                    to set this parameter, the minimal API request parameters
-                    needed for this method to function correctly are:
-
-                    ``{'inprop': ('protection',),
+        :param res: The result of an earlier API request (optional). If you
+                    are planning to set this parameter to a
+                    value other than None, the minimal API request parameters
+                    needed for this method to function
+                    correctly are: ``{'inprop': 'protection',
                     'prop': ('info', 'revisions', 'categories'),
                     'rvprop': ('user', 'content')}``
+
         """
         self.__load(res)
         if self.follow_redirects and self.is_redirect:
@@ -146,14 +143,12 @@ class Page:
 
     def __edit(self, content, summary, minor, bot, force, edittype):
         title = self.title
-        try:
-            token = self._api.tokens['edit']
-        except KeyError:
+        token = self._api.tokens['edit']
+        if token is None:
             self._api.set_token("edit")
-            if not 'edit' in self._api.tokens:
+            if token is None:
                 err = "You do not have the edit permission"
                 raise exc.PermissionError(err)
-            token = self._api.tokens['edit']
         edit_params = {"action": "edit", "title": title, "text": content,
                        "token": token, "summary": summary}
         edit_params['notbot'] = 1
@@ -163,11 +158,8 @@ class Page:
             edit_params['minor'] = edit_params.pop("notminor")
         if bot:
             edit_params['bot'] = edit_params.pop("notbot")
-        if title.lower().startswith("special:"):
-            err = "Pages in the Special namespace can't be edited"
-            raise exc.InvalidPageError(err)
         if force is False:
-            detect_ec = {"prop": "revisions", "rvprop": "timestamp", "titles": title}
+            detect_ec = dict(prop="revisions", rvprop="timestamp", titles=title)
             ec_timestamp_res = tuple(self._api.iterator(1, **detect_ec))[0]
             if 'missing' in ec_timestamp_res and edittype != 'create':
                 err = "Use the 'create' method to create pages"
@@ -180,7 +172,7 @@ class Page:
                 edit_params['basetimestamp'] = ec_timestamp
                 edit_params['starttimestamp'] = strftime("%Y-%m-%dT%H:%M:%SZ", gmtime())
             # Add a checksum to ensure that the text is not corrupted
-            edit_params['md5'] = hashlib.md5(content.encode("utf-8")).hexdigest()
+            edit_params['md5'] = md5(content.encode("utf-8")).hexdigest()
         if edittype == 'append':
             edit_params['appendtext'] = edit_params.pop("text")
         elif edittype == 'prepend':
@@ -198,20 +190,20 @@ class Page:
 
     def edit(self, content, summary="", minor=False, bot=False, force=False):
         """
-        Replaces the page's content with *content*. *summary* is the edit
+        Replace the page's content with *content*. *summary* is the edit
         summary used for the edit. The edit will be marked as minor if *minor*
         is True, and if *bot* is True and the logged-in user has the bot flag,
         it will also be marked as a bot edit.
 
-        Set *force* to True in order to make the edit even if there's an edit
-        conflict or the page was deleted/recreated while the method executed.
+        Set *force* to True in order to make the edit in spite of edit
+        conflicts and nonexistence.
 
         :type content: str
         :param content: The text with which to replace the page's original
                         content.
         :type summary: str
-        :param summary: The comment to use for the modification, sometimes
-                        known as the edit summary.
+        :param summary: The comment to use for the modification, also known as
+                        the edit summary.
         :type minor: bool
         :param minor: Mark the edit as minor, if set to True.
         :type bot: bool
@@ -220,42 +212,123 @@ class Page:
         :type force: bool
         :param force: If set to True, ignore edit conflicts and create the
                       page if it doesn't already exist.
-        :returns: A dictionary containing the API query result
+        :returns: A dictionary containing the API query result.
         """
         return self.__edit(content, summary, minor, bot, force, 'standard')
 
     def create(self, content, summary="", minor=False, bot=False, force=False):
+        """
+        Create the page with *content* as the content. *summary* is the edit
+        summary used for the edit. The edit will be marked as minor if *minor*
+        is True, and if *bot* is True and the logged-in user has the bot flag,
+        it will also be marked as a bot edit.
+
+        Set *force* to True in order to make the edit in spite of edit
+        conflicts.
+
+        :type content: str
+        :param content: The text with which to create the page.
+        :type summary: str
+        :param summary: The comment to use for the modification, also known as
+                        the edit summary.
+        :type minor: bool
+        :param minor: Mark the edit as minor, if set to True.
+        :type bot: bool
+        :param bot: Mark the edit as a bot edit, if the logged in user has the
+                    bot flag and the parameter is set to True.
+        :type force: bool
+        :param force: If set to True, ignore edit conflicts and create the
+                      page if it doesn't already exist.
+        :returns: A dictionary containing the API query result.
+        """
         return self.__edit(content, summary, minor, bot, force, 'create')
 
     def append(self, content, summary="", minor=False, bot=False, force=False):
+        """
+        Add *content* to the bottom of the page. *summary* is the edit
+        summary used for the edit. The edit will be marked as minor if *minor*
+        is True, and if *bot* is True and the logged-in user has the bot flag,
+        it will also be marked as a bot edit.
+
+        Set *force* to True in order to make the edit in spite of edit
+        conflicts or nonexistence.
+
+        :type content: str
+        :param content: The text with which to append to the page's original
+                        content.
+        :type summary: str
+        :param summary: The comment to use for the modification, also known as
+                        the edit summary.
+        :type minor: bool
+        :param minor: Mark the edit as minor, if set to True.
+        :type bot: bool
+        :param bot: Mark the edit as a bot edit, if the logged in user has the
+                    bot flag and the parameter is set to True.
+        :type force: bool
+        :param force: If set to True, ignore edit conflicts and create the
+                      page if it doesn't already exist.
+        :returns: A dictionary containing the API query result.
+        """
         return self.__edit(content, summary, minor, bot, force, 'append')
 
     def prepend(self, content, summary="", minor=False, bot=False, force=False):
+        """
+        Add *content* to the top of the page. *summary* is the edit
+        summary used for the edit. The edit will be marked as minor if *minor*
+        is True, and if *bot* is True and the logged-in user has the bot flag,
+        it will also be marked as a bot edit.
+
+        Set *force* to True in order to make the edit in spite of edit
+        conflicts or nonexistence.
+
+        :type content: str
+        :param content: The text with which to prepend to the page's original
+                        content.
+        :type summary: str
+        :param summary: The comment to use for the modification, also known as
+                        the edit summary.
+        :type minor: bool
+        :param minor: Mark the edit as minor, if set to True.
+        :type bot: bool
+        :param bot: Mark the edit as a bot edit, if the logged in user has the
+                    bot flag and the parameter is set to True.
+        :type force: bool
+        :param force: If set to True, ignore edit conflicts and create the
+                      page if it doesn't already exist.
+        :returns: A dictionary containing the API query result.
+        """
         return self.__edit(content, summary, minor, bot, force, 'prepend')
 
-    def move(self, target, reason, *args, **kwargs):
+    def move(self, target, reason, *args):
+        """
+        Move the page to a new title, *target*.
+        """
         move_params = {"action": "move", "from": self.title,
                        "to": target, "reason": reason
         }
-        try:
-            move_params['token'] = self._api.tokens['move']
-        except KeyError:
+        move_params['token'] = self._api.tokens['move']
+        if move_params['token'] is None:
             self._api.set_token("move")
-            if not 'move' in self._api.tokens:
+            if move_params['token'] is None:
                 err = "You do not have the move permission"
                 raise exc.PermissionError(err)
-        allowed = ("movetalk", "movesubpages", "noredirect", "watch", "unwatch")
-        for arg in args + tuple(kwargs):
+        allowed = "movetalk movesubpages noredirect watch unwatch".split()
+#        allowed = ("movetalk", "movesubpages", "noredirect", "watch", "unwatch")
+        for arg in args:
             if arg in allowed:
                 move_params[arg] = 1
         return self._api.call(**move_params)
 
     def from_revid(self, revid):
         """
-        Returns a Page object for the given revid.
+        Returns a Page object by extracting information from the given revid.
 
         This method does not follow redirects, and the very process of calling
         the method makes an API query.
+
+        :type revid: int
+        :param revid: The revision ID corresponding to the page being requested.
+        :returns: A page.
         """
         kwargs = {"prop": ("info", "revisions", "categories"),
                   "inprop": "protection",
@@ -267,6 +340,44 @@ class Page:
         p.load_attributes(tuple(res)[0])
         return p
 
+    def toggle_talk(self, follow_redirects=None):
+        """
+        Return a page with its namespace switched to or from the talk
+        namespace.
+
+        :type follow_redirects: bool
+        :param follow_redirects: If set to anything other than None (the
+                                 default), this will be passed to the new Page
+                                 object's constructor. Otherwise, it will be
+                                 set to the one passed to its own constructor.
+        :returns: The page that's either the talk or non-talk version of the
+                  current page.
+        :raises: exc.InvalidPageError
+        """
+        ns = self._api.namespaces[self.namespace]
+        if self.namespace < 0:
+            err = "Pages in the {0!r} namespace do not have talk pages"
+            raise exc.InvalidPageError(err.format(ns))
+        if self.is_talkpage:
+            # Talk -> Content
+            new_ns = self.namespace - 1
+            if not new_ns:
+                new_title = self.title.partition(":")[-1]
+            else:
+                new_title = ":" + self.title.partition(":")[-1]
+        else:
+            # Content -> Talk
+            new_ns = self.namespace + 1
+            if not self.namespace:
+                new_title = ":" + self.title
+            else:
+                new_title = ":" + self.title.partition(":")[-1]
+        new_ns_prefix = self._api.namespaces[new_ns]
+        full_title = new_ns_prefix + new_title
+        if follow_redirects is None:
+            follow_redirects = self.follow_redirects
+        return self._api.page(full_title, follow_redirects)
+
     @property
     def title(self):
         """
@@ -274,6 +385,8 @@ class Page:
         prior to the execution of this method, the result will be equal to the
         *title* parameter passed to the constructor. Otherwise, it will be
         normalised.
+
+        :returns: The page's title.
         """
         return self._title
 
@@ -281,6 +394,8 @@ class Page:
     def pageid(self):
         """
         An integer ID representing the page.
+
+        :returns: The page's ID.
         """
         return self._pageid
 
@@ -341,11 +456,13 @@ class Page:
         Gets the Page object for the target this Page redirects to.
 
         If this Page doesn't exist, or is invalid, it will
-        raise a NonexistentPageError, or InvalidPageError respectively.
+        raise a NonexistentPageError, or InvalidPageError respectively. If the
+        page isn't a redirect, it will do SOMETHING.
 
         :returns: Page object that represents the redirect target.
         :raises: NonexistentPageError, InvalidPageError
         """
+        #TODO: finish docstring
         if not self.exists:
             raise exc.NonexistentPageError("Page does not exist")
         if not self.is_redirect:
@@ -383,14 +500,14 @@ class Page:
                   are, by default, 'edit', 'create', and 'move'. If the wiki
                   is configured to have other protection types, those types
                   will also be included in the keys. The values can be
-                  (None, None) (no restriction for that action) or (level,
-                  expiry):
+                  ``(None, None)`` (no restriction for that action) or
+                  ``(level, expiry)``:
 
-                  - level is the userright needed to perform the action
-                    ('autoconfirmed', for example)
-                  - expiry is the expiration time of the restriction. This will
-                    either be None, or a datetime at which the protection will
-                    expire.
+                  - ``level`` is the userright needed to perform the action
+                    (``"autoconfirmed"``, for example)
+                  - ``expiry`` is the expiration time of the restriction. This
+                    will either be None, or a datetime at which the protection
+                    will expire.
         """
         return blah(self, "_protection")
 

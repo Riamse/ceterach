@@ -1,33 +1,29 @@
 #!/usr/bin/python3
+#-------------------------------------------------------------------------------
+# This file is part of Ceterach.
+# Copyright (C) 2012 Andrew Wang <andrewwang43@gmail.com>
+#
+# Ceterach is free software; you can redistribute it and/or modify it under
+# the terms of the GNU Lesser General Public License as published by the Free
+# Software Foundation; either version 3 of the License, or (at your option)
+# any later version.
+#
+# Ceterach is distributed in the hope that it will be useful, but WITHOUT ANY
+# WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+# FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more
+# details.
+#
+# You should have received a copy of the GNU Lesser General Public License
+# along with Ceterach.  If not, see <http://www.gnu.org/licenses/>.
+#-------------------------------------------------------------------------------
 
 import re
-import sys
-
-__author__ = 'Andrew'
 
 # __all__ and friends are defined at the bottom
 
-def recursion_depth():
-    """
-    This is an evil hack. Avoid using it whenever possible.
-    """
-    frame = sys._getframe()
-    k = -2
-    while True:
-        try:
-            frame = frame.f_back
-        except AttributeError:
-            return k
-        k += 1
-#    k = 0
-#    while True:
-#        try:
-#            sys._getframe(k)
-#        except ValueError:
-#            # The very act of calling a function sends us one level deeper, so
-#            # we have to return one_level_too_high - 1 - 1
-#            return k - 2
-#        k += 1
+class DictThatReturnsNoneInsteadOfRaisingKeyError(dict):
+    def __getitem__(self, item):
+        return super().get(item, None)
 
 def flattened(nested: (list, tuple)) -> list:
     """
