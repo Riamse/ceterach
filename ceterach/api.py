@@ -1,12 +1,11 @@
 #!/usr/bin/python3
-# -*- coding: utf-8 -*-
 #-------------------------------------------------------------------------------
 # This file is part of Ceterach.
 # Copyright (C) 2012 Riamse <riamse@protonmail.com>
 #
 # Ceterach is free software; you can redistribute it and/or modify it under
 # the terms of the GNU Lesser General Public License as published by the Free
-# Software Foundation; either version 2.1 of the License, or (at your option)
+# Software Foundation; either version 3 of the License, or (at your option)
 # any later version.
 #
 # Ceterach is distributed in the hope that it will be useful, but WITHOUT ANY
@@ -19,6 +18,7 @@
 #-------------------------------------------------------------------------------
 
 import itertools
+import collections
 from time import time, sleep
 from urllib.parse import urlparse
 from platform import python_version as pyv
@@ -31,7 +31,7 @@ from .category import Category
 from .file import File
 from .page import Page
 from .user import User
-from .utils import flattened
+from .utils import flattened, DictThatReturnsNoneInsteadOfRaisingKeyError
 
 #stackoverflow.com/questions/3217492/list-of-language-codes-in-yaml-or-json
 
@@ -49,34 +49,36 @@ def_config = {"throttle": 0,
 
 class MediaWiki:
 
+    _tokens = DictThatReturnsNoneInsteadOfRaisingKeyError
+    _namespaces = None
+
     def __init__(self, api_url="http://en.wikipedia.org/w/api.php", config=None):
 #    def __init__(self, api_url="http://quickqabox.com/MediaWiki/api.php", config=None):
         """
-        *api_url* is the full url to the wiki's API. For Wikipedia it would
-        be http://en.wikipedia.org/w/api.php
+        *api_url* is the full url to the wiki's API (default:
+        ``"http://en.wikipedia.org/w/api.php"``).
 
         *config* is a dictionary whose keys are:
 
-        - *throttle*, the number of seconds to wait in between requests
+        - *throttle*, the number of seconds to wait in between
+          requests (default: ``0``).
         - *maxlag*, the maximum number of seconds the wiki's slave
-          servers are allowed to lag until stopping the request. For more
-          information, see `MediaWiki docs. <http://www.mediawiki.org/wiki/Man
-          ual:Maxlag>`_
-        - *retries*, how many times to retry after an error. You can
-          use ``float("inf")`` for an indefinite number of times.
-        - *get*, a tuple of which modules can accept GET requests,
-          which can vary from wiki to wiki.
+          servers are allowed to lag until stopping the
+          request (default: ``5``). For more information, see `MediaWiki
+          docs <http://www.mediawiki.org/wiki/Manual:Maxlag>`_\.
+        - *retries*, how many times to retry after an error (default: ``0``).
+          You can use ``float("inf")`` for an indefinite number of times.
+        - *get*, a tuple of which modules can accept GET requests, which
+          can vary from wiki to wiki (default: ``("query", "purge")``).
         """
         o = urlparse(api_url)
         if not o.path.endswith("api.php"):
             raise ValueError("Not an API url")
         api_url = (o.scheme or "http") + "://" + o.netloc + o.path
-        self.index_url = api_url.rpartition("api.php")[0] + "index.php"
         self.api_url = api_url
         self.config = deepcopy(def_config)
         self.config.update(config or {})
         self.last_query = time()
-        self.tokens = {}
         self.opener = requests.Session(headers={"User-Agent": USER_AGENT})
 
     def __repr__(self):
@@ -146,7 +148,7 @@ class MediaWiki:
         params.setdefault("action", "query")
         params.update({"format": "json"})
         for (k, v) in params.items():
-            if isinstance(v, (list, tuple)):
+            if isinstance(v, collections.Iterable) and not isinstance(v, str):
                 v = flattened(v)
                 params[k] = "|".join(str(i) for i in v)
         is_get_action = params['action'] in conf['get']
@@ -192,9 +194,6 @@ class MediaWiki:
         :param password: Password that corresponds to the username.
         :returns: True if the login succeeded, False if not.
         """
-        check_result = self.call(action="query", meta="userinfo")
-        if not 'anon' in check_result['query']['userinfo']:
-            return True # Already logged in
         params = {"action": "login", "lgname": username, "lgpassword": password}
         result = self.call(**params)
         if result['login']['result'] == "Success":
@@ -208,9 +207,9 @@ class MediaWiki:
 
     def logout(self):
         """
-        Try to log the bot out.
+        Log the bot out.
 
-        :returns: True if the logout succeeded, False if not.
+        :returns: True
         """
         return self.call(action="logout") == []
 
@@ -219,34 +218,36 @@ class MediaWiki:
         Sets the Wiki's ``tokens`` attribute with the tokens specified in
         the *args*.
 
-        If *args* are not specified, they will default to ``['edit']``. This
+        If *args* are not specified, they will default to ``'delete', 'block',
+        'patrol', 'protect', 'unblock', 'options', 'email', 'edit', 'import',
+        'move', 'watch'``. This
         method will work only if a user is logged in.
 
         :param args: Strings that represent token names
         """
-        if not args:
-            args = ['edit']
         allowed = set("block delete edit email import move "
                       "options patrol protect unblock watch".split())
+        if not args:
+            args = allowed
         received = set(args)
         invalid_args = received - allowed
-        if invalid_args:
-            for bad_token in invalid_args:
-                received.remove(bad_token)
+        for bad_token in invalid_args:
+            received.remove(bad_token)
         query = {"action": "tokens", "type": received}
         try:
             res = self.call(**query)
-        except exc.CeterachError:
+        except exc.APIError:
             # The wiki does not support action=tokens
-            query = {"prop": "info", "titles": "Main Page",
+            query = {"prop": "info", "titles": "some random title",
                      "action": "query", "intoken": received}
             res = self.call(**query)['query']['pages']
             for prop, value in list(res.values())[0].items():
                 if prop.endswith("token"):
-                    self.tokens[prop[:-5]] = value
+                    self._tokens[prop[:-5]] = value
         else:
+            # The wiki does support action=tokens
             for token_name, token_value in res['tokens'].items():
-                self.tokens[token_name[:-5]] = token_value
+                self._tokens[token_name[:-5]] = token_value
 
     def expandtemplates(self, title, text, includecomments=False):
         """
@@ -256,7 +257,8 @@ class MediaWiki:
         ki/API:Parsing_wikitext#expandtemplates>`_.
 
         :type title: str
-        :param title: Act like the wikicode is on this page (default: API).
+        :param title: Act like the wikicode is on this page (default:
+                      ``"API"``).
                       This only really matters when parsing links to the page
                       itself or links to subpages, or when using `magic words
                       <http://www.mediawiki.org/wiki/Help:Magic_words>`_ like
@@ -265,6 +267,7 @@ class MediaWiki:
         :param text: Wikicode to process.
         :type includecomments: bool
         :param includecomments: Whether to include HTML comments in the output.
+                                Defaults to False.
         :returns: Text with templates expanded.
         """
         params = {"action": "expandtemplates", "title": title, "text": text}
@@ -350,3 +353,15 @@ class MediaWiki:
             raise ValueError(err.format(tuple(kwargs)[0], allowed))
         return tuple(self.iterator(action='purge', **kwargs))
 
+    @property
+    def tokens(self):
+        return deepcopy(self._tokens)
+
+    @property
+    def namespaces(self):
+        if self._namespaces is None:
+            self._namespaces = {}
+            for ns in self.iterator(meta="siteinfo", siprop="namespaces"):
+                nsid = ns['id']
+                self._namespaces[nsid] = ns["*"]
+        return self._namespaces
