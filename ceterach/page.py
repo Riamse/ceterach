@@ -35,7 +35,7 @@ def blah_with_exc(obj, attr):
     if obj.exists:
         return getattr(obj, attr)
     else:
-        err = "Page  {0!r} does not exist".format(obj.title)
+        err = "Page {0!r} does not exist".format(obj.title)
         raise exc.NonexistentPageError(err)
 
 class Page:

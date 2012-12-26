@@ -19,7 +19,18 @@
 
 from .page import Page
 from . import exceptions as exc
-# TODO: Make this thing raise exceptions
+
+def blah(obj, attr):
+    if not hasattr(obj, attr):
+        obj.load_attributes()
+    return getattr(obj, attr)
+
+def blah_with_exc(obj, attr):
+    if obj.exists:
+        return getattr(obj, attr)
+    else:
+        err = "File {0!r} does not exist".format(obj.title)
+        raise exc.NonexistentPageError(err)
 
 class File(Page):
 
@@ -30,15 +41,19 @@ class File(Page):
         iiprop = ('size', 'mime', 'sha1', 'url', 'user')
         res = res or list(i(1, prop=prop, iiprop=iiprop, rvprop=rvprop,
                             rvlimit=1, rvdir="older", titles=self._title))[0]
-        imageinfo = res['imageinfo'][0]
+        super().load_attributes(res=res)
         self.repository = res['imagerepository']
+        try:
+            imageinfo = res['imageinfo'][0]
+        except KeyError:
+            # This file doesn't exist
+            return
         self._url = imageinfo['url']
         self._mime = imageinfo['mime']
         self._hash = imageinfo['sha1']
         self._size = imageinfo['size']
         self._uploader = self._api.user(imageinfo['user'])
         self._dimensions = imageinfo['width'], imageinfo['height']
-        super().load_attributes(res=res)
 
     def upload(self, fileobj, text, summary, watch=False, key=''):
         if not 'r' in fileobj.mode:
@@ -54,11 +69,15 @@ class File(Page):
             post_params['sessionkey'] = key
         res = self._api.call(**post_params)
         if 'upload' in res and res['upload']['result'] == "Success":
+            # Some attributes are now out of date
             del self._dimensions, self._uploader, self._hash
             self._exists = True
         return res
 
     def download(self, fileobj=None, width=None, height=None):
+        if not self.exists:
+            err = "File {0!r} does not exist"
+            raise exc.NonexistentPageError(err.format(self.title))
         if width and height:
             raise TypeError("Cannot specify both width and height")
         res = self._api.opener.get(self.url)
@@ -67,36 +86,54 @@ class File(Page):
 
     @property
     def url(self):
-        if not hasattr(self, "_url"):
-            self.load_attributes()
-        return self._url
+        try:
+            return blah(self, "_url")
+        except AttributeError:
+            err = True
+        if err:
+            return blah_with_exc(self, "_url")
 
     @property
     def mime(self):
-        if not hasattr(self, "_mime"):
-            self.load_attributes()
-        return self._mime
+        try:
+            return blah(self, "_mime")
+        except AttributeError:
+            err = True
+        if err:
+            return blah_with_exc(self, "_mime")
 
     @property
     def hash(self):
-        if not hasattr(self, "_hash"):
-            self.load_attributes()
-        return self._hash
+        try:
+            return blah(self, "_hash")
+        except AttributeError:
+            err = True
+        if err:
+            return blah_with_exc(self, "_hash")
 
     @property
     def size(self):
-        if not hasattr(self, "_size"):
-            self.load_attributes()
-        return self._size
+        try:
+            return blah(self, "_size")
+        except AttributeError:
+            err = True
+        if err:
+            return blah_with_exc(self, "_size")
 
     @property
     def dimensions(self):
-        if not hasattr(self, "_dimensions"):
-            self.load_attributes()
-        return self._dimensions
+        try:
+            return blah(self, "_dimensions")
+        except AttributeError:
+            err = True
+        if err:
+            return blah_with_exc(self, "_dimensions")
 
     @property
     def uploader(self):
-        if not hasattr(self, "_uploader"):
-            self.load_attributes()
-        return self._uploader
+        try:
+            return blah(self, "_uploader")
+        except AttributeError:
+            err = True
+        if err:
+            return blah_with_exc(self, "_uploader")
