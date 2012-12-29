@@ -79,7 +79,8 @@ class MediaWiki:
         self.config = deepcopy(def_config)
         self.config.update(config or {})
         self.last_query = time()
-        self.opener = requests.Session(headers={"User-Agent": USER_AGENT})
+        self.opener = requests.Session()
+        self.opener.headers.update({"User-Agent": USER_AGENT})
 
     def __repr__(self):
         cls_name = type(self).__name__
@@ -132,7 +133,7 @@ class MediaWiki:
 
     def call(self, **params) -> dict:
         """
-        Sends an API query to the wiki, with *identity* as query parameters.
+        Sends an API query to the wiki, with *params* as query parameters.
         Before the request is sent, the 'format' key of *params* will be set
         to 'json'.
 
@@ -159,7 +160,7 @@ class MediaWiki:
         except (requests.HTTPError, requests.ConnectionError):
             raise exc.APIError("REQUEST FAILURE.")
         self.last_query = time()
-        ret = res.json # None if no JSON object could be decoded
+        ret = res.json() # None if no JSON object could be decoded
         if ret is None:
             raise exc.APIError("No JSON object could be decoded")
         elif 'error' in ret:
@@ -173,7 +174,7 @@ class MediaWiki:
                     sleep(throttle)
                     try:
                         res = urlopen(self.api_url, params=params)
-                        ret = res.json
+                        ret = res.json()
                     except (requests.HTTPError, requests.ConnectionError):
                         raise exc.APIError("REQUEST FAILURE.")
                     if not 'error' in ret:
