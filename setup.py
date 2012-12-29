@@ -27,7 +27,7 @@ from ceterach import __version__
 def read_long_description():
     return open("README.md").read()
 
-required_packages = ['requests>=0.14.1']
+required_packages = ['requests>=1.0.3']
 
 setup(name='ceterach',
       version=__version__,
