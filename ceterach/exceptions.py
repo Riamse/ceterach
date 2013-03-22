@@ -29,7 +29,7 @@ class NonexistentUserError(CeterachError):
 class InvalidPageError(CeterachError):
     """Attempted to get information about a page whose title is invalid."""
 
-class APIError(CeterachError):
+class ApiError(CeterachError):
     """
     Could not connect to the API and process the response correctly.
     Perhaps the URL was malformed, the site does not exist, the API does not

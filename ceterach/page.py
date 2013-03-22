@@ -21,22 +21,31 @@ import re
 from hashlib import md5
 from datetime import datetime
 from time import strftime, gmtime
+from functools import wraps
 
 from . import exceptions as exc
 
 __all__ = ["Page"]
 
-def blah(obj, attr):
-    if not hasattr(obj, attr):
-        obj.load_attributes()
-    return getattr(obj, attr)
+#def decorate(attr):
+#    def wrapped(self):
+#        return "getattr({!r}, {!r})".format(self, attr)
+#        if not hasattr(self, attr): self.load_attributes()
+#        return getattr(self, attr)
+#    return lambda the_func: wrapped
 
-def blah_with_exc(obj, attr):
-    if obj.exists:
-        return getattr(obj, attr)
-    else:
-        err = "Page {0!r} does not exist".format(obj.title)
-        raise exc.NonexistentPageError(err)
+def decorate(attr):
+    def decorator(func):
+        @wraps(func)
+        def wrapped(self):
+            if not hasattr(self, attr): self.load_attributes()
+            try:
+                return getattr(self, attr)
+            except AttributeError:
+                err = "Page {0!r} does not exist".format(self.title)
+            raise exc.NonexistentPageError(err)
+        return wrapped
+    return decorator
 
 class Page:
     """
@@ -80,7 +89,7 @@ class Page:
         """
         self.__load(res)
         if self.follow_redirects and self.is_redirect:
-            self._title = self.redirect_target.title
+            self._title = self.get_redirect_target().title
             del self._content
             self.__load(None)
 
@@ -135,8 +144,9 @@ class Page:
             self._revision_user = self._api.user(res['revisions'][0]['user'])
             self._revid = res['lastrevid']
         except KeyError:
-            self._revision_user = None
-            self._revid = None
+            pass
+#            self._revision_user = None
+#            self._revid = None
         c = self._api.category
         cats = res.get("categories", "")
         self._categories = tuple(c(x['title']) for x in cats)
@@ -146,6 +156,7 @@ class Page:
         token = self._api.tokens['edit']
         if token is None:
             self._api.set_token("edit")
+            token = self._api.tokens['edit']
             if token is None:
                 err = "You do not have the edit permission"
                 raise exc.PermissionError(err)
@@ -340,6 +351,9 @@ class Page:
         p.load_attributes(tuple(res)[0])
         return p
 
+    def load_revisions(self, num=1):
+        pass
+
     def toggle_talk(self, follow_redirects=None):
         """
         Return a page with its namespace switched to or from the talk
@@ -400,6 +414,7 @@ class Page:
         return self._pageid
 
     @property
+    @decorate("_content")
     def content(self):
         """
         Returns the page content, which is cached if you try to get this
@@ -410,32 +425,30 @@ class Page:
         :returns: The page content
         :raises: NonexistentPageError
         """
-        try:
-            return blah(self, "_content")
-        except AttributeError:
-            err = True
-        if err:
-            return blah_with_exc(self, "_content")
+        return None
 
     @property
+    @decorate("_exists")
     def exists(self):
         """
         Check the existence of the page.
 
         :returns: True if the page exists, False otherwise
         """
-        return blah(self, "_exists")
+        return 1
 
     @property
+    @decorate("_is_talkpage")
     def is_talkpage(self):
         """
         Check if this page is in a talk namespace.
 
         :returns: True if the page is in a talk namespace, False otherwise
         """
-        return blah(self, "_is_talkpage")
+        return 1
 
     @property
+    @decorate("_revision_user")
     def revision_user(self):
         """
         Returns the username or IP of the last user to edit the page.
@@ -443,15 +456,9 @@ class Page:
         :returns: A User object
         :raises: NonexistentPageError, if the page doesn't exist or is invalid.
         """
-        try:
-            return blah(self, "_revision_user")
-        except AttributeError:
-            err = True
-        if err:
-            return blah_with_exc(self, "_revision_user")
+        return 1
 
-    @property
-    def redirect_target(self):
+    def get_redirect_target(self):
         """
         Gets the Page object for the target this Page redirects to.
 
@@ -477,21 +484,24 @@ class Page:
         return self._redirect_target
 
     @property
+    @decorate("_is_redirect")
     def is_redirect(self):
         """
         :returns: True if the page is a redirect, False if the Page isn't or
                   doesn't exist.
         """
-        return blah(self, "_is_redirect")
+        return 1
 
     @property
+    @decorate("_namespace")
     def namespace(self):
         """
         :returns: An integer representing the Page's namespace.
         """
-        return blah(self, "_namespace")
+        return 1
 
     @property
+    @decorate("_protection")
     def protection(self):
         """
         Get the protection levels on the page.
@@ -509,20 +519,17 @@ class Page:
                     will either be None, or a datetime at which the protection
                     will expire.
         """
-        return blah(self, "_protection")
+        return 1
 
     @property
+    @decorate("_revid")
     def revid(self):
         """
         :returns: An integer representing the Page's current revision ID.
         """
-        try:
-            return blah(self, "_revid")
-        except AttributeError:
-            err = True
-        if err:
-            return blah_with_exc(self, "_revid")
+        return 1
 
     @property
+    @decorate("_categories")
     def categories(self):
-        return blah(self, "_categories")
+        return 1
