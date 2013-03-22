@@ -17,7 +17,7 @@
 # along with Ceterach.  If not, see <http://www.gnu.org/licenses/>.
 #-------------------------------------------------------------------------------
 
-from . import api, page, category, user, exceptions
+from . import api, page, category, file, revision, user, exceptions
 
 __author__ = "Riamse"
 __version__ = "0.0.1"

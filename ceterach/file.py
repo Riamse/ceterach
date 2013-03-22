@@ -75,6 +75,7 @@ class File(Page):
         return res
 
     def download(self, fileobj=None, width=None, height=None):
+        # TODO: Width and height
         if not self.exists:
             err = "File {0!r} does not exist"
             raise exc.NonexistentPageError(err.format(self.title))
@@ -122,6 +123,9 @@ class File(Page):
 
     @property
     def dimensions(self):
+        """
+        :returns: (width, height)
+        """
         try:
             return blah(self, "_dimensions")
         except AttributeError:
@@ -131,6 +135,10 @@ class File(Page):
 
     @property
     def uploader(self):
+        """
+        :returns: A User object representing the user who uploaded the most
+        recent revision of the file.
+        """
         try:
             return blah(self, "_uploader")
         except AttributeError:

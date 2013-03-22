@@ -53,7 +53,8 @@ class MediaWiki:
     _namespaces = None
 
     def __init__(self, api_url="http://en.wikipedia.org/w/api.php", config=None):
-#    def __init__(self, api_url="http://quickqabox.com/MediaWiki/api.php", config=None):
+#    def __init__(self, api_url="http://wiki.ciit.zp.ua/api.php", config=None): # 1.16
+#    def __init__(self, api_url="http://wiki.mako.cc/api.php", config=None): # 1.19
         """
         *api_url* is the full url to the wiki's API (default:
         ``"http://en.wikipedia.org/w/api.php"``).
@@ -125,13 +126,16 @@ class MediaWiki:
         params['pageid' if isinstance(identity, int) else 'title'] = identity
         return Page(self, **params)
 
-    def user(self, name) -> User:
+    def user(self, identity) -> User:
         """
         Returns a User object for *identity*, which represents the username.
         """
-        return User(self, name)
+        return User(self, identity)
 
-    def call(self, **params) -> dict:
+    def call(self, **params) -> type("", (collections.UserDict, list), {}):
+        # Annotated so the IDE will autocomplete convenient methods.
+        # it may be true that true, false, and null are valid Python objects,
+        # but those don't have any methods worth autocompleting.
         """
         Sends an API query to the wiki, with *params* as query parameters.
         Before the request is sent, the 'format' key of *params* will be set
@@ -158,12 +162,10 @@ class MediaWiki:
         try:
             res = urlopen(self.api_url, params=params)
         except (requests.HTTPError, requests.ConnectionError):
-            raise exc.APIError("REQUEST FAILURE.")
+            raise exc.ApiError("REQUEST FAILURE.")
         self.last_query = time()
-        ret = res.json() # None if no JSON object could be decoded
-        if ret is None:
-            raise exc.APIError("No JSON object could be decoded")
-        elif 'error' in ret:
+        ret = res.json() # If it fails, it'll raise a ValueError
+        if 'error' in ret:
             if ret['error']['code'] == 'maxlag':
                 try:
                     retries = (int(conf['retries']),)
@@ -176,11 +178,11 @@ class MediaWiki:
                         res = urlopen(self.api_url, params=params)
                         ret = res.json()
                     except (requests.HTTPError, requests.ConnectionError):
-                        raise exc.APIError("REQUEST FAILURE.")
+                        raise exc.ApiError("REQUEST FAILURE.")
                     if not 'error' in ret:
                         break
                 else:
-                    raise exc.APIError(err.format(retries))
+                    raise exc.ApiError(err.format(retries))
             else:
                 raise ValueError(ret['error']['info'])
         return ret
@@ -237,7 +239,7 @@ class MediaWiki:
         query = {"action": "tokens", "type": received}
         try:
             res = self.call(**query)
-        except exc.APIError:
+        except exc.ApiError:
             # The wiki does not support action=tokens
             query = {"prop": "info", "titles": "some random title",
                      "action": "query", "intoken": received}
@@ -308,7 +310,7 @@ class MediaWiki:
             res['query'].pop("interwiki", 0)
             a_res = res['query'].values()
             if len(a_res) > 1:
-                X = StopIteration # or maybe exc.APIError?
+                X = StopIteration # or maybe exc.ApiError?
                 err = "Too many nodes under the query node: {0}"
                 raise X(err.format(", ".join(res['query'].keys())))
             else:
