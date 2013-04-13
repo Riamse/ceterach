@@ -24,18 +24,6 @@ from . import exceptions as exc
 
 __all__ = ["File"]
 
-def blah(obj, attr):
-    if not hasattr(obj, attr):
-        obj.load_attributes()
-    return getattr(obj, attr)
-
-def blah_with_exc(obj, attr):
-    if obj.exists:
-        return getattr(obj, attr)
-    else:
-        err = "File {0!r} does not exist".format(obj.title)
-        raise exc.NonexistentPageError(err)
-
 def decorate(meth):
     attr = meth(0) # The method should be returning the attribute to get
     @functools.wraps(meth)
@@ -44,8 +32,8 @@ def decorate(meth):
         try:
             return getattr(self, attr)
         except AttributeError:
-            err = "User {0!r} does not exist".format(self.name)
-        raise exc.NonexistentUserError(err)
+            err = "File {0!r} does not exist".format(self.title)
+        raise exc.NonexistentPageError(err)
     return wrapped
 
 class File(Page):
