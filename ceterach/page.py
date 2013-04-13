@@ -21,9 +21,11 @@ import re
 from hashlib import md5
 from datetime import datetime
 from time import strftime, gmtime
-from functools import wraps
 
 from . import exceptions as exc
+from .user import User
+from .revision import Revision
+from .utils import decorate
 
 __all__ = ["Page"]
 
@@ -34,18 +36,18 @@ __all__ = ["Page"]
 #        return getattr(self, attr)
 #    return lambda the_func: wrapped
 
-def decorate(attr):
-    def decorator(func):
-        @wraps(func)
-        def wrapped(self):
-            if not hasattr(self, attr): self.load_attributes()
-            try:
-                return getattr(self, attr)
-            except AttributeError:
-                err = "Page {0!r} does not exist".format(self.title)
-            raise exc.NonexistentPageError(err)
-        return wrapped
-    return decorator
+#def decorate(attr):
+#    def decorator(func):
+#        @wraps(func)
+#        def wrapped(self):
+#            if not hasattr(self, attr): self.load_attributes()
+#            try:
+#                return getattr(self, attr)
+#            except AttributeError:
+#                err = "Page {0!r} does not exist".format(self.title)
+#            raise exc.NonexistentPageError(err)
+#        return wrapped
+#    return decorator
 
 class Page:
     """
@@ -97,7 +99,7 @@ class Page:
         i = self._api.iterator
         prop = ('info', 'revisions', 'categories')
         inprop = ("protection",)
-        rvprop = ('user', 'content')
+        rvprop = ('ids', 'flags', 'timestamp', 'user', 'comment', 'content')
         kwargs = {"prop": prop, "rvprop": rvprop, "inprop": inprop,
                   "rvlimit": 1, "rvdir": "older"
         }
@@ -135,18 +137,17 @@ class Page:
             for info in res['protection']:
                 expiry = info['expiry']
                 if expiry == 'infinity':
-                    expiry = datetime.max
+                    expiry = getattr(datetime, 'max')
                 else:
                     expiry = datetime.strptime(expiry, "%Y-%m-%dT%H:%M:%SZ")
                 self._protection[info['type']] = info['level'], expiry
         # These last two fields will only be specified if the page exists:
+        self._revisions = ()
         try:
             self._revision_user = self._api.user(res['revisions'][0]['user'])
             self._revid = res['lastrevid']
         except KeyError:
             pass
-#            self._revision_user = None
-#            self._revid = None
         c = self._api.category
         cats = res.get("categories", "")
         self._categories = tuple(c(x['title']) for x in cats)
@@ -351,8 +352,23 @@ class Page:
         p.load_attributes(tuple(res)[0])
         return p
 
-    def load_revisions(self, num=1):
-        pass
+    def load_revisions(self, num=float("inf")):
+        kwargs = {"prop": "revisions",
+                  "rvprop": ('ids', 'flags', 'timestamp',
+                             'user', 'comment', 'content'),
+                  "rvlimit": 'max' if num == float("inf") else num,
+                  "rvdir": "older",
+                  "rvstartid": self.revid,
+                  "titles": self._title,
+        }
+        res = self._api.call(**kwargs)
+        revs = tuple(res['query']['pages'].values())[0]['revisions']
+        for r in revs:
+            revision_obj = Revision(self._api, r['revid'])
+            filler = {"pageid": self.pageid}
+            filler['revisions'] = (r,)
+            revision_obj.load_attributes(filler)
+            self._revisions += (revision_obj,)
 
     def toggle_talk(self, follow_redirects=None):
         """
@@ -393,7 +409,7 @@ class Page:
         return self._api.page(full_title, follow_redirects)
 
     @property
-    def title(self):
+    def title(self) -> str:
         """
         Returns the page's title. If self.load_attributes() was not called
         prior to the execution of this method, the result will be equal to the
@@ -405,7 +421,7 @@ class Page:
         return self._title
 
     @property
-    def pageid(self):
+    def pageid(self) -> int:
         """
         An integer ID representing the page.
 
@@ -414,8 +430,8 @@ class Page:
         return self._pageid
 
     @property
-    @decorate("_content")
-    def content(self):
+    @decorate
+    def content(self) -> str:
         """
         Returns the page content, which is cached if you try to get this
         attribute again.
@@ -425,38 +441,38 @@ class Page:
         :returns: The page content
         :raises: NonexistentPageError
         """
-        return None
+        return "_content"
 
     @property
-    @decorate("_exists")
-    def exists(self):
+    @decorate
+    def exists(self) -> bool:
         """
         Check the existence of the page.
 
         :returns: True if the page exists, False otherwise
         """
-        return 1
+        return "_exists"
 
     @property
-    @decorate("_is_talkpage")
-    def is_talkpage(self):
+    @decorate
+    def is_talkpage(self) -> bool:
         """
         Check if this page is in a talk namespace.
 
         :returns: True if the page is in a talk namespace, False otherwise
         """
-        return 1
+        return "_is_talkpage"
 
     @property
-    @decorate("_revision_user")
-    def revision_user(self):
+    @decorate
+    def revision_user(self) -> User:
         """
         Returns the username or IP of the last user to edit the page.
 
         :returns: A User object
         :raises: NonexistentPageError, if the page doesn't exist or is invalid.
         """
-        return 1
+        return "_revision_user"
 
     def get_redirect_target(self):
         """
@@ -484,25 +500,25 @@ class Page:
         return self._redirect_target
 
     @property
-    @decorate("_is_redirect")
-    def is_redirect(self):
+    @decorate
+    def is_redirect(self) -> bool:
         """
         :returns: True if the page is a redirect, False if the Page isn't or
                   doesn't exist.
         """
-        return 1
+        return "_is_redirect"
 
     @property
-    @decorate("_namespace")
-    def namespace(self):
+    @decorate
+    def namespace(self) -> int:
         """
         :returns: An integer representing the Page's namespace.
         """
-        return 1
+        return "_namespace"
 
     @property
-    @decorate("_protection")
-    def protection(self):
+    @decorate
+    def protection(self) -> dict:
         """
         Get the protection levels on the page.
 
@@ -519,17 +535,22 @@ class Page:
                     will either be None, or a datetime at which the protection
                     will expire.
         """
-        return 1
+        return "_protection"
 
     @property
-    @decorate("_revid")
-    def revid(self):
+    @decorate
+    def revid(self) -> int:
         """
         :returns: An integer representing the Page's current revision ID.
         """
-        return 1
+        return "_revid"
 
     @property
-    @decorate("_categories")
-    def categories(self):
-        return 1
+    @decorate
+    def categories(self) -> tuple:
+        return "_categories"
+
+    @property
+    @decorate
+    def revisions(self) -> tuple:
+        return "_revisions"
