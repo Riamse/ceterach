@@ -25,6 +25,7 @@ from time import strftime, gmtime
 
 from . import exceptions as exc
 from .revision import Revision
+from .utils import isostrptime
 
 __all__ = ["Page"]
 
@@ -150,7 +151,7 @@ class Page:
                 if expiry == 'infinity':
                     expiry = getattr(datetime, 'max')
                 else:
-                    expiry = datetime.strptime(expiry, "%Y-%m-%dT%H:%M:%SZ")
+                    expiry = isostrptime(expiry)
                 self._protection[info['type']] = info['level'], expiry
         # These last two fields will only be specified if the page exists:
         self._revisions = ()
