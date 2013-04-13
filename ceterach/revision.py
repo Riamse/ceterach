@@ -17,7 +17,21 @@
 # along with Ceterach.  If not, see <http://www.gnu.org/licenses/>.
 #-------------------------------------------------------------------------------
 
-from .utils import decorate
+import functools
+
+from . import exceptions as exc
+
+def decorate(meth):
+    attr = meth(0) # The method should be returning the attribute to get
+    @functools.wraps(meth)
+    def wrapped(self):
+        if not hasattr(self, attr): self.load_attributes()
+        try:
+            return getattr(self, attr)
+        except AttributeError:
+            err = "Revision {0!r} does not exist".format(self.revid)
+        raise exc.NonexistentRevisionError(err)
+    return wrapped
 
 class Revision:
 

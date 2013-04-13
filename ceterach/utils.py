@@ -28,19 +28,6 @@ class DictThatReturnsNoneInsteadOfRaisingKeyError(dict):
     def __getitem__(self, item):
         return super().get(item, None)
 
-def decorate(meth):
-    attr = meth(0) # The method should be returning the attribute to get
-    @functools.wraps(meth)
-    def wrapped(self):
-        if not hasattr(self, attr): self.load_attributes()
-        try:
-            return getattr(self, attr)
-        except AttributeError:
-            err = "Page {0!r} does not exist".format(self.title)
-        raise exc.NonexistentPageError(err)
-    return wrapped
-
-
 def flattened(nested: (list, tuple)) -> list:
     """
     For the sake of simplicity, `list` will refer to both lists and tuples.
