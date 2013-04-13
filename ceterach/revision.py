@@ -20,6 +20,7 @@
 import functools
 
 from . import exceptions as exc
+from .utils import isostrptime
 
 def decorate(meth):
     attr = meth(0) # The method should be returning the attribute to get
@@ -53,7 +54,7 @@ class Revision:
         self._page = self._api.page(res['pageid'])
         res = res['revisions'][0]
         self._summary = res['comment']
-        self._timestamp = res['timestamp']
+        self._timestamp = isostrptime(res['timestamp'])
         self._user = self._api.user(res['user'])
         self._is_minor = 'minor' in res
         if res['parentid']:

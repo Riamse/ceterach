@@ -29,14 +29,9 @@ except ImportError:
     # Also, this provides support for Python 3.2
     from .utils import ip_address
 from . import exceptions as exc
+from .utils import isostrptime
 
 __all__ = ['User']
-
-def blah_with_exc(obj, attr):
-    if obj.exists:
-        return getattr(obj, attr)
-    else:
-        raise exc.NonexistentUserError("The user does not exist")
 
 def decorate(meth):
     attr = meth(0) # The method should be returning the attribute to get
@@ -98,7 +93,7 @@ class User:
         self._editcount = res.get("editcount", 0)
         reg = res.get("registration", None) # For IP addresses
         try:
-            self._registration = datetime.strptime(reg, "%Y-%m-%dT%H:%M:%SZ")
+            self._registration = isostrptime(reg)
         except TypeError:
             # Sometimes the API doesn't give a date; the user's probably really
             # old. There's nothing else we can do!

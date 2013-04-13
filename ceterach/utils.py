@@ -18,15 +18,18 @@
 #-------------------------------------------------------------------------------
 
 import re
-import functools
-
-from . import exceptions as exc
+import datetime
 
 # __all__ and friends are defined at the bottom
 
 class DictThatReturnsNoneInsteadOfRaisingKeyError(dict):
     def __getitem__(self, item):
         return super().get(item, None)
+
+
+def isostrptime(stamp):
+    """I'm lazy, and can never remember the format string"""
+    return datetime.datetime.strptime(stamp, "%Y-%m-%dT%H:%M:%SZ")
 
 def flattened(nested: (list, tuple)) -> list:
     """
