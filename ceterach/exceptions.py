@@ -26,6 +26,9 @@ class NonexistentPageError(CeterachError):
 class NonexistentUserError(CeterachError):
     """Attempted to get information about a user that does not exist."""
 
+class NonexistentRevisionError(CeterachError):
+    """Attempted to get information about a revision that does not exist."""
+
 class InvalidPageError(CeterachError):
     """Attempted to get information about a page whose title is invalid."""
 

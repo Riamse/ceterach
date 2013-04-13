@@ -18,14 +18,13 @@
 #-------------------------------------------------------------------------------
 
 import re
+import functools
 from hashlib import md5
 from datetime import datetime
 from time import strftime, gmtime
 
 from . import exceptions as exc
-from .user import User
 from .revision import Revision
-from .utils import decorate
 
 __all__ = ["Page"]
 
@@ -48,6 +47,18 @@ __all__ = ["Page"]
 #            raise exc.NonexistentPageError(err)
 #        return wrapped
 #    return decorator
+
+def decorate(meth):
+    attr = meth(0) # The method should be returning the attribute to get
+    @functools.wraps(meth)
+    def wrapped(self):
+        if not hasattr(self, attr): self.load_attributes()
+        try:
+            return getattr(self, attr)
+        except AttributeError:
+            err = "Page {0!r} does not exist".format(self.title)
+        raise exc.NonexistentPageError(err)
+    return wrapped
 
 class Page:
     """
@@ -465,7 +476,7 @@ class Page:
 
     @property
     @decorate
-    def revision_user(self) -> User:
+    def revision_user(self):
         """
         Returns the username or IP of the last user to edit the page.
 

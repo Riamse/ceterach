@@ -18,6 +18,7 @@
 #-------------------------------------------------------------------------------
 
 from datetime import datetime
+import functools
 try:
     from ipaddress import ip_address
 except ImportError:
@@ -37,6 +38,18 @@ def blah_with_exc(obj, attr):
     else:
         raise exc.NonexistentUserError("The user does not exist")
 
+def decorate(meth):
+    attr = meth(0) # The method should be returning the attribute to get
+    @functools.wraps(meth)
+    def wrapped(self):
+        if not hasattr(self, attr): self.load_attributes()
+        try:
+            return getattr(self, attr)
+        except AttributeError:
+            err = "User {0!r} does not exist".format(self.name)
+        raise exc.NonexistentUserError(err)
+    return wrapped
+
 class User:
     def __init__(self, api, name):
         self._api = api
@@ -55,6 +68,7 @@ class User:
                                     usprop=props)['query']['users'][0]
         # normalize our username in case it was entered oddly
         self._name = res['name']
+        self._userpage = self._api.page("User:" + self.name)
         if 'missing' in res:
             self._exists = False
             return
@@ -107,53 +121,61 @@ class User:
         return self._api.create_account(self.name, password, email, realname, logout)
 
     @property
-    def is_ip(self):
-        if not hasattr(self, "_is_ip"):
-            self.load_attributes()
-        return self._is_ip
+    @decorate
+    def is_ip(self) -> bool:
+        return "_is_ip"
 
     @property
-    def name(self):
-        return self._name
+    @decorate
+    def name(self) -> str:
+        return "_name"
 
     @property
+    @decorate
     def userpage(self):
-        return self._api.page("User:" + self.name)
+        return "_userpage"
 
     @property
-    def userid(self):
-        return blah_with_exc(self, "_userid")
+    @decorate
+    def userid(self) -> int:
+        return "_userid"
 
     @property
-    def blockinfo(self):
-        return blah_with_exc(self, "_blockinfo")
+    @decorate
+    def blockinfo(self) -> dict:
+        return "_blockinfo"
 
     @property
-    def editcount(self):
-        return blah_with_exc(self, "_editcount")
+    @decorate
+    def editcount(self) -> int:
+        return "_editcount"
 
     @property
-    def is_emailable(self):
-        return blah_with_exc(self, "_emailable")
+    @decorate
+    def is_emailable(self) -> bool:
+        return "_emailable"
 
     @property
-    def rights(self):
-        return blah_with_exc(self, "_rights")
+    @decorate
+    def rights(self) -> tuple:
+        return "_rights"
 
     @property
-    def registration(self):
-        return blah_with_exc(self, "_registration")
+    @decorate
+    def registration(self) -> datetime:
+        return "_registration"
 
     @property
-    def groups(self):
-        return blah_with_exc(self, "_groups")
+    @decorate
+    def groups(self) -> list:
+        return "_groups"
 
     @property
-    def gender(self):
-        return blah_with_exc(self, "_gender")
+    @decorate
+    def gender(self) -> str:
+        return "_gender"
 
     @property
-    def exists(self):
-        if not hasattr(self, "_exists"):
-            self.load_attributes()
-        return self._exists
+    @decorate
+    def exists(self) -> bool:
+        return "_exists"
