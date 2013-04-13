@@ -17,8 +17,12 @@
 # along with Ceterach.  If not, see <http://www.gnu.org/licenses/>.
 #-------------------------------------------------------------------------------
 
+import functools
+
 from .page import Page
 from . import exceptions as exc
+
+__all__ = ["File"]
 
 def blah(obj, attr):
     if not hasattr(obj, attr):
@@ -31,6 +35,18 @@ def blah_with_exc(obj, attr):
     else:
         err = "File {0!r} does not exist".format(obj.title)
         raise exc.NonexistentPageError(err)
+
+def decorate(meth):
+    attr = meth(0) # The method should be returning the attribute to get
+    @functools.wraps(meth)
+    def wrapped(self):
+        if not hasattr(self, attr): self.load_attributes()
+        try:
+            return getattr(self, attr)
+        except AttributeError:
+            err = "User {0!r} does not exist".format(self.name)
+        raise exc.NonexistentUserError(err)
+    return wrapped
 
 class File(Page):
 
@@ -56,8 +72,6 @@ class File(Page):
         self._dimensions = imageinfo['width'], imageinfo['height']
 
     def upload(self, fileobj, text, summary, watch=False, key=''):
-        if not 'r' in fileobj.mode:
-            raise ValueError("The file object must be readable")
         fileobj.seek(0)
         contents = fileobj.read()
         post_params = {"filename": self.title, "text": text,
@@ -86,62 +100,38 @@ class File(Page):
             fileobj.write(res.content)
 
     @property
-    def url(self):
-        try:
-            return blah(self, "_url")
-        except AttributeError:
-            err = True
-        if err:
-            return blah_with_exc(self, "_url")
+    @decorate
+    def url(self) -> str:
+        return "_url"
 
     @property
-    def mime(self):
-        try:
-            return blah(self, "_mime")
-        except AttributeError:
-            err = True
-        if err:
-            return blah_with_exc(self, "_mime")
+    @decorate
+    def mime(self) -> str:
+        return "_mime"
 
     @property
-    def hash(self):
-        try:
-            return blah(self, "_hash")
-        except AttributeError:
-            err = True
-        if err:
-            return blah_with_exc(self, "_hash")
+    @decorate
+    def hash(self) -> str:
+        return "_hash"
 
     @property
-    def size(self):
-        try:
-            return blah(self, "_size")
-        except AttributeError:
-            err = True
-        if err:
-            return blah_with_exc(self, "_size")
+    @decorate
+    def size(self) -> int:
+        return "_size"
 
     @property
-    def dimensions(self):
+    @decorate
+    def dimensions(self) -> tuple:
         """
         :returns: (width, height)
         """
-        try:
-            return blah(self, "_dimensions")
-        except AttributeError:
-            err = True
-        if err:
-            return blah_with_exc(self, "_dimensions")
+        return "_dimensions"
 
     @property
+    @decorate
     def uploader(self):
         """
         :returns: A User object representing the user who uploaded the most
         recent revision of the file.
         """
-        try:
-            return blah(self, "_uploader")
-        except AttributeError:
-            err = True
-        if err:
-            return blah_with_exc(self, "_uploader")
+        return "_uploader"
