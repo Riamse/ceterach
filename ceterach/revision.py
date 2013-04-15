@@ -18,10 +18,11 @@
 #-------------------------------------------------------------------------------
 
 import functools
+import datetime
 
 from . import exceptions as exc
 from .utils import isostrptime
-
+# TODO: Deal with decorator code redundancy
 def decorate(meth):
     attr = meth(0) # The method should be returning the attribute to get
     @functools.wraps(meth)
@@ -48,11 +49,13 @@ class Revision:
         rvprop = ('ids', 'flags', 'timestamp', 'user', 'comment', 'content')
         kwargs = {"revids": self._revid,
                   "prop": "revisions",
-                  "rvprop": rvprop
+                  "rvprop": rvprop,
+                  "rvtoken": "rollback"
         }
         res = res or list(i(1, **kwargs))[0]
         self._page = self._api.page(res['pageid'])
         res = res['revisions'][0]
+        self._rvtoken = res['rollbacktoken']
         self._summary = res['comment']
         self._timestamp = isostrptime(res['timestamp'])
         self._user = self._api.user(res['user'])
@@ -72,8 +75,15 @@ class Revision:
     def restore(self, summary="", minor=False, bot=True, force=False):
         pass
 
-    def rollback(self):
-        pass
+    def rollback(self, summary="", bot=False):
+        params = {"title": self.page.title, "user": self.user.name,
+                  "token": self._rvtoken, "action": "rollback"
+        }
+        if summary is not None:
+            params['summary'] = summary
+        if bot:
+            params['markbot'] = 1
+        return self._api.call(**params)
 
     def delete(self):
         pass
@@ -83,7 +93,7 @@ class Revision:
 
     @property
     @decorate
-    def page(self):
+    def page(self) -> object:
         return "_page"
 
     @property
@@ -93,12 +103,12 @@ class Revision:
 
     @property
     @decorate
-    def timestamp(self):
+    def timestamp(self)-> datetime.datetime:
         return "_timestamp"
 
     @property
     @decorate
-    def user(self):
+    def user(self) -> object:
         return "_user"
 
     @property
@@ -108,7 +118,7 @@ class Revision:
 
     @property
     @decorate
-    def prev_revision(self):
+    def prev_revision(self) -> object:
         return "_prev_revision"
 
     @property
