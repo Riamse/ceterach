@@ -36,19 +36,6 @@ __all__ = ["Page"]
 #        return getattr(self, attr)
 #    return lambda the_func: wrapped
 
-#def decorate(attr):
-#    def decorator(func):
-#        @wraps(func)
-#        def wrapped(self):
-#            if not hasattr(self, attr): self.load_attributes()
-#            try:
-#                return getattr(self, attr)
-#            except AttributeError:
-#                err = "Page {0!r} does not exist".format(self.title)
-#            raise exc.NonexistentPageError(err)
-#        return wrapped
-#    return decorator
-
 def decorate(meth):
     attr = meth(0) # The method should be returning the attribute to get
     @functools.wraps(meth)
