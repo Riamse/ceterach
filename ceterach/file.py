@@ -17,24 +17,17 @@
 # along with Ceterach.  If not, see <http://www.gnu.org/licenses/>.
 #-------------------------------------------------------------------------------
 
-import functools
-
 from .page import Page
 from . import exceptions as exc
+from .utils import blah_decorate
 
 __all__ = ["File"]
 
 def decorate(meth):
-    attr = meth(0) # The method should be returning the attribute to get
-    @functools.wraps(meth)
-    def wrapped(self):
-        if not hasattr(self, attr): self.load_attributes()
-        try:
-            return getattr(self, attr)
-        except AttributeError:
-            err = "File {0!r} does not exist".format(self.title)
-        raise exc.NonexistentPageError(err)
-    return wrapped
+    msg = "File {0!r} does not exist"
+    attr = "title"
+    err = exc.NonexistentPageError
+    return blah_decorate(meth, msg, attr, err)
 
 class File(Page):
 

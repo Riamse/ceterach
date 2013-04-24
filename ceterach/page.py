@@ -18,35 +18,21 @@
 #-------------------------------------------------------------------------------
 
 import re
-import functools
 from hashlib import md5
 from datetime import datetime
 from time import strftime, gmtime
 
 from . import exceptions as exc
 from .revision import Revision
-from .utils import isostrptime
+from .utils import isostrptime, blah_decorate
 
 __all__ = ["Page"]
 
-#def decorate(attr):
-#    def wrapped(self):
-#        return "getattr({!r}, {!r})".format(self, attr)
-#        if not hasattr(self, attr): self.load_attributes()
-#        return getattr(self, attr)
-#    return lambda the_func: wrapped
-
 def decorate(meth):
-    attr = meth(0) # The method should be returning the attribute to get
-    @functools.wraps(meth)
-    def wrapped(self):
-        if not hasattr(self, attr): self.load_attributes()
-        try:
-            return getattr(self, attr)
-        except AttributeError:
-            err = "Page {0!r} does not exist".format(self.title)
-        raise exc.NonexistentPageError(err)
-    return wrapped
+    msg = "Page {0!r} does not exist"
+    attr = "title"
+    err = exc.NonexistentPageError
+    return blah_decorate(meth, msg, attr, err)
 
 class Page:
     """
@@ -471,7 +457,9 @@ class Page:
         :returns: A User object
         :raises: NonexistentPageError, if the page doesn't exist or is invalid.
         """
-        return "_revision_user"
+        #: :type: ceterach.user.User
+        attr = "_revision_user"
+        return attr
 
     def get_redirect_target(self):
         """
@@ -484,7 +472,7 @@ class Page:
         :returns: Page object that represents the redirect target.
         :raises: NonexistentPageError, InvalidPageError
         """
-        #TODO: finish docstring
+        #TODO: finish docstring and make it consistent with actual behaviour
         if not self.exists:
             raise exc.NonexistentPageError("Page does not exist")
         if not self.is_redirect:

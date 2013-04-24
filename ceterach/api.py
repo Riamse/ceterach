@@ -31,6 +31,7 @@ from .category import Category
 from .file import File
 from .page import Page
 from .user import User
+from .revision import Revision
 from .utils import flattened, DictThatReturnsNoneInsteadOfRaisingKeyError
 
 #stackoverflow.com/questions/3217492/list-of-language-codes-in-yaml-or-json
@@ -131,6 +132,12 @@ class MediaWiki:
         Returns a User object for *identity*, which represents the username.
         """
         return User(self, identity)
+
+    def revision(self, identity) -> Revision:
+        """
+        Returns a Revision object for *identity*, which represents the revid.
+        """
+        return Revision(self, identity)
 
     def call(self, **params) -> type("", (collections.UserDict, list), {}):
         # Annotated so the IDE will autocomplete convenient methods.
