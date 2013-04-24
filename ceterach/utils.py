@@ -19,6 +19,7 @@
 
 import re
 import datetime
+import functools
 
 # __all__ and friends are defined at the bottom
 
@@ -26,6 +27,33 @@ class DictThatReturnsNoneInsteadOfRaisingKeyError(dict):
     def __getitem__(self, item):
         return super().get(item, None)
 
+
+#def decorate(attr):
+#    def wrapped(self):
+#        return "getattr({!r}, {!r})".format(self, attr)
+#        if not hasattr(self, attr): self.load_attributes()
+#        return getattr(self, attr)
+#    return lambda the_func: wrapped
+
+def blah_decorate(meth, message, message_attr, error):
+    attr = meth(0) # The method should be returning the attribute to get
+    @functools.wraps(meth)
+    def wrapped(self):
+        if not hasattr(self, attr): self.load_attributes()
+        try:
+            return getattr(self, attr)
+        except AttributeError:
+            err = message.format(getattr(self, message_attr))
+        raise error(err)
+    return wrapped
+
+def addprop(inst, name, method): # http://stackoverflow.com/a/2954373/1133718
+    cls = type(inst)
+    if not hasattr(cls, '__perinstance'):
+        cls = type(cls.__name__, (cls,), {})
+        cls.__perinstance = True
+        inst.__class__ = cls
+    setattr(cls, name, property(method))
 
 def isostrptime(stamp):
     """I'm lazy, and can never remember the format string"""

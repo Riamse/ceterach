@@ -18,7 +18,6 @@
 #-------------------------------------------------------------------------------
 
 from datetime import datetime
-import functools
 try:
     from ipaddress import ip_address
 except ImportError:
@@ -29,21 +28,15 @@ except ImportError:
     # Also, this provides support for Python 3.2
     from .utils import ip_address
 from . import exceptions as exc
-from .utils import isostrptime
+from .utils import isostrptime, blah_decorate
 
 __all__ = ['User']
 
 def decorate(meth):
-    attr = meth(0) # The method should be returning the attribute to get
-    @functools.wraps(meth)
-    def wrapped(self):
-        if not hasattr(self, attr): self.load_attributes()
-        try:
-            return getattr(self, attr)
-        except AttributeError:
-            err = "User {0!r} does not exist".format(self.name)
-        raise exc.NonexistentUserError(err)
-    return wrapped
+    msg = "User {0!r} does not exist"
+    attr = "name"
+    err = exc.NonexistentUserError
+    return blah_decorate(meth, msg, attr, err)
 
 class User:
     def __init__(self, api, name):
@@ -128,7 +121,9 @@ class User:
     @property
     @decorate
     def userpage(self):
-        return "_userpage"
+        #: :type: ceterach.page.Page
+        attr = "_userpage"
+        return attr
 
     @property
     @decorate

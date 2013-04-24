@@ -17,27 +17,22 @@
 # along with Ceterach.  If not, see <http://www.gnu.org/licenses/>.
 #-------------------------------------------------------------------------------
 
-import functools
 import datetime
 
 from . import exceptions as exc
-from .utils import isostrptime
-# TODO: Deal with decorator code redundancy
+from .utils import isostrptime, blah_decorate
+
 def decorate(meth):
-    attr = meth(0) # The method should be returning the attribute to get
-    @functools.wraps(meth)
-    def wrapped(self):
-        if not hasattr(self, attr): self.load_attributes()
-        try:
-            return getattr(self, attr)
-        except AttributeError:
-            err = "Revision {0!r} does not exist".format(self.revid)
-        raise exc.NonexistentRevisionError(err)
-    return wrapped
+    msg = "Revision {0!r} does not exist"
+    attr = 'revid'
+    err = exc.NonexistentRevisionError
+    return blah_decorate(meth, msg, attr, err)
 
 class Revision:
 
     def __init__(self, api, revid):
+        from ceterach.api import MediaWiki
+        assert isinstance(api, MediaWiki)
         self._api = api
         self._revid = revid
 
@@ -55,11 +50,14 @@ class Revision:
         res = res or list(i(1, **kwargs))[0]
         self._page = self._api.page(res['pageid'])
         res = res['revisions'][0]
-        self._rvtoken = res['rollbacktoken']
         self._summary = res['comment']
         self._timestamp = isostrptime(res['timestamp'])
         self._user = self._api.user(res['user'])
         self._is_minor = 'minor' in res
+        try:
+            self._rvtoken = res['rollbacktoken']
+        except KeyError:
+            pass
         if res['parentid']:
             self._prev_revision = Revision(self._api, res['parentid'])
         else:
@@ -76,9 +74,14 @@ class Revision:
         pass
 
     def rollback(self, summary="", bot=False):
-        params = {"title": self.page.title, "user": self.user.name,
+        params = {"title": self.page._api, "user": self.user.name,
                   "token": self._rvtoken, "action": "rollback"
         }
+        try:
+            params['token'] = self._rvtoken
+        except AttributeError:
+            err = "You do not have the rollback permission"
+            raise exc.PermissionError(err)
         if summary is not None:
             params['summary'] = summary
         if bot:
@@ -93,8 +96,10 @@ class Revision:
 
     @property
     @decorate
-    def page(self) -> object:
-        return "_page"
+    def page(self):
+        #: :type: ceterach.page.Page
+        attr = "_page"
+        return attr
 
     @property
     @decorate
@@ -108,8 +113,10 @@ class Revision:
 
     @property
     @decorate
-    def user(self) -> object:
-        return "_user"
+    def user(self):
+        #: :type: ceterach.user.User
+        attr = "_user"
+        return attr
 
     @property
     @decorate
@@ -118,8 +125,10 @@ class Revision:
 
     @property
     @decorate
-    def prev_revision(self) -> object:
-        return "_prev_revision"
+    def prev_revision(self):
+        #: :type: ceterach.revision.Revision
+        attr = "_prev_revision"
+        return attr
 
     @property
     @decorate
