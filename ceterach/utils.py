@@ -36,6 +36,7 @@ class DictThatReturnsNoneInsteadOfRaisingKeyError(dict):
 #    return lambda the_func: wrapped
 
 def blah_decorate(meth, message, message_attr, error):
+    """I'm lazy"""
     attr = meth(0) # The method should be returning the attribute to get
     @functools.wraps(meth)
     def wrapped(self):

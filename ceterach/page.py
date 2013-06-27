@@ -118,14 +118,13 @@ class Page:
                             "move": (None, None),
                             "create": (None, None),
         }
-        if res.get("protection", None):
-            for info in res['protection']:
-                expiry = info['expiry']
-                if expiry == 'infinity':
-                    expiry = getattr(datetime, 'max')
-                else:
-                    expiry = isostrptime(expiry)
-                self._protection[info['type']] = info['level'], expiry
+        for info in res.get("protection", ''):
+            expiry = info['expiry']
+            if expiry == 'infinity':
+                expiry = getattr(datetime, 'max')
+            else:
+                expiry = isostrptime(expiry)
+            self._protection[info['type']] = info['level'], expiry
         # These last two fields will only be specified if the page exists:
         self._revisions = ()
         try:
@@ -296,25 +295,47 @@ class Page:
         """
         return self.__edit(content, summary, minor, bot, force, 'prepend')
 
-    def move(self, target, reason, *args):
+    def move(self, target, reason, talk=False, subpages=False,
+             redirect=True):
         """
         Move the page to a new title, *target*.
+        :type target: str
+        :param target: Title you want to rename the page to.
+        :type reason: str
+        :param reason: The reason for the move.
+        :type talk: bool
+        :param talk: Move the talk page too, if set to True.
+        :type subpages: bool
+        :param subpages: Move subpages too, if set to True.
+        :type redirect: bool
+        :param redirect: Leave a redirect behind, if set to True.
+        :returns: A dictionary containing the API query result.
         """
         move_params = {"action": "move", "from": self.title,
-                       "to": target, "reason": reason
+                       "to": target, "reason": reason,
+                       "movetalk": talk, "movesubpages": subpages,
+                       "noredirect": not redirect,
         }
+        move_params = {k: v for (k, v) in move_params.items() if v}
         move_params['token'] = self._api.tokens['move']
         if move_params['token'] is None:
             self._api.set_token("move")
             if move_params['token'] is None:
                 err = "You do not have the move permission"
                 raise exc.PermissionError(err)
-        allowed = "movetalk movesubpages noredirect watch unwatch".split()
 #        allowed = ("movetalk", "movesubpages", "noredirect", "watch", "unwatch")
-        for arg in args:
-            if arg in allowed:
-                move_params[arg] = 1
         return self._api.call(**move_params)
+
+    def delete(self, reason=""):
+        """
+        Delete the page.
+
+        :type reason: str
+        :param reason: The reason for the deletion.
+        """
+
+    def watch(self):
+        pass
 
     def from_revid(self, revid):
         """
@@ -333,7 +354,7 @@ class Page:
                   "revids": revid,
         }
         res = self._api.iterator(**kwargs)
-        p = self._api.page("some random title")
+        p = type(self)(self._api, "some random title")
         p.load_attributes(tuple(res)[0])
         return p
 
@@ -376,10 +397,7 @@ class Page:
         if self.is_talkpage:
             # Talk -> Content
             new_ns = self.namespace - 1
-            if not new_ns:
-                new_title = self.title.partition(":")[-1]
-            else:
-                new_title = ":" + self.title.partition(":")[-1]
+            new_title = (":" if new_ns else "") + self.title.partition(":")[-1]
         else:
             # Content -> Talk
             new_ns = self.namespace + 1
