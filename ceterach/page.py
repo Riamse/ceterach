@@ -332,10 +332,46 @@ class Page:
 
         :type reason: str
         :param reason: The reason for the deletion.
+        :returns: A dictionary containing the API query result
         """
+        stuff = {"action": "delete", "title": self.title}
+        if reason:
+            stuff['reason'] = reason
+        stuff['token'] = self._api.tokens['delete']
+        if not stuff['token']:
+            self._api.set_token("delete")
+            if not self._api.tokens['delete']:
+                err = "You do not have the delete permission"
+                raise exc.PermissionError(err)
+            stuff['token'] = self._api.tokens['delete']
+        return self._api.call(stuff)
+
+    def undelete(self, reason=""):
+        """
+        Unelete the page.
+
+        :type reason: str
+        :param reason: The reason for the undeletion.
+        :returns: A dictionary containing the API query result
+        """
+        stuff = {"action": "undelete", "title": self.title}
+        if reason:
+            stuff['reason'] = reason
+        stuff['token'] = self._api.tokens['undelete']
+        if not stuff['token']:
+            self._api.set_token("undelete")
+            if not self._api.tokens['undelete']:
+                err = "You do not have the delete permission"
+                raise exc.PermissionError(err)
+            stuff['token'] = self._api.tokens['undelete']
+        return self._api.call(stuff)
 
     def watch(self):
-        pass
+        """
+        Add or remove the page to or from the watchlist.
+        :returns: A dictionary containing the API query result
+        """
+        pass #TODO: Stuff
 
     def from_revid(self, revid):
         """
