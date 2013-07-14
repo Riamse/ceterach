@@ -162,6 +162,7 @@ class MediaWiki:
         params.update({"format": "json"})
         for (k, v) in params.items():
             if isinstance(v, collections.Iterable) and not isinstance(v, str):
+                # We might not need this part
                 v = flattened(v)
                 params[k] = "|".join(str(i) for i in v)
         is_get_action = params['action'] in conf['get']

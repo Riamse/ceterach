@@ -31,8 +31,6 @@ def decorate(meth):
 class Revision:
 
     def __init__(self, api, revid):
-        from ceterach.api import MediaWiki
-        assert isinstance(api, MediaWiki)
         self._api = api
         self._revid = revid
 
