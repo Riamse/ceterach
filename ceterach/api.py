@@ -42,6 +42,7 @@ USER_AGENT = "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:14.0) Gecko/20100101 Firefo
 #USER_AGENT = "Ceterach/{0!s} (Python {1!s}; mailto:riamse@protonmail.com)"
 #USER_AGENT = USER_AGENT.format(cv, pyv())
 USER_AGENT.format(pyv())
+# TODO: Remember that this part of the file actually exists
 def_config = {"throttle": 0,
               "maxlag": 5,
               "retries": 0,
@@ -73,6 +74,11 @@ class MediaWiki:
           You can use ``float("inf")`` for an indefinite number of times.
         - *get*, a tuple of which modules can accept GET requests, which
           can vary from wiki to wiki (default: ``("query", "purge")``).
+
+        *config* can be a dictionary that only contains those parameters you
+        wish to modify. Passing ``{"throttle": 3.14}``, for example, will
+        result in a dictionary with the above parameters, except the throttle
+        will be 3.14.
         """
         o = urlparse(api_url)
         if not o.path.endswith("api.php"):
@@ -162,7 +168,7 @@ class MediaWiki:
         params.update({"format": "json"})
         for (k, v) in params.items():
             if isinstance(v, collections.Iterable) and not isinstance(v, str):
-                # We might not need this part
+                # We probably don't need this part
                 v = flattened(v)
                 params[k] = "|".join(str(i) for i in v)
         is_get_action = params['action'] in conf['get']
@@ -242,9 +248,7 @@ class MediaWiki:
         if not args:
             args = allowed
         received = set(args)
-        invalid_args = received - allowed
-        for bad_token in invalid_args:
-            received.remove(bad_token)
+        received = received & allowed
         query = {"action": "tokens", "type": received}
         try:
             res = self.call(**query)
