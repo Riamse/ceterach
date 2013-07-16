@@ -31,6 +31,8 @@ def decorate(meth):
 class Revision:
 
     def __init__(self, api, revid):
+        #: :type: ceterach.api.MediaWiki
+        api = api
         self._api = api
         self._revid = revid
 
@@ -69,7 +71,30 @@ class Revision:
             self._is_deleted = False
 
     def restore(self, summary="", minor=False, bot=True, force=False):
-        pass
+        """
+        Replace the page's content with the content found in this revision.
+        *summary* is the edit summary used for the edit. The edit will be
+        marked as minor if *minor* is True, and if *bot* is True and the
+        logged-in user has the bot flag, it will also be marked as a bot
+        edit.
+
+        Set *force* to True in order to make the edit in spite of edit
+        conflicts and nonexistence.
+
+        :type summary: str
+        :param summary: The comment to use for the modification, also known as
+                        the edit summary.
+        :type minor: bool
+        :param minor: Mark the edit as minor, if set to True.
+        :type bot: bool
+        :param bot: Mark the edit as a bot edit, if the logged in user has the
+                    bot flag and the parameter is set to True.
+        :type force: bool
+        :param force: If set to True, ignore edit conflicts and create the
+                      page if it doesn't already exist.
+        :returns: A dictionary containing the API query result.
+        """
+        return self.page.edit(self.content, summary, minor, bot, force)
 
     def rollback(self, summary="", bot=False):
         params = {"title": self.page._api, "user": self.user.name,
@@ -86,11 +111,11 @@ class Revision:
             params['markbot'] = 1
         return self._api.call(**params)
 
-    def delete(self):
-        pass
-
-    def undelete(self):
-        pass
+#    def delete(self):
+#        pass
+#
+#    def undelete(self):
+#        pass
 
     @property
     @decorate
