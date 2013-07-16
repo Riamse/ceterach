@@ -126,5 +126,4 @@ def ip_address(address: str):
     else:
         raise ValueError(err.format(address))
 
-# The ultra-lazy way of making __all__ contain only functions
 __all__ = [v.__name__ for v in vars().values() if hasattr(v, "__call__")]

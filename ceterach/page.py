@@ -366,13 +366,6 @@ class Page:
             stuff['token'] = self._api.tokens['undelete']
         return self._api.call(stuff)
 
-    def watch(self):
-        """
-        Add or remove the page to or from the watchlist.
-        :returns: A dictionary containing the API query result
-        """
-        pass #TODO: Stuff
-
     def from_revid(self, revid):
         """
         Returns a Page object by extracting information from the given revid.
