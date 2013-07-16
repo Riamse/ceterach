@@ -90,7 +90,7 @@ class User:
         except TypeError:
             # Sometimes the API doesn't give a date; the user's probably really
             # old. There's nothing else we can do!
-            self._registration = datetime.min
+            self._registration = datetime.utcfromtimestamp(0) # earlier than datetime.min
         self._emailable = 'emailable' in res
 
     def email(self, subject, text, cc=True):
