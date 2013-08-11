@@ -17,6 +17,9 @@
 # along with Ceterach.  If not, see <http://www.gnu.org/licenses/>.
 #-------------------------------------------------------------------------------
 
+from urllib.parse import quote
+import re
+
 from .page import Page
 from . import exceptions as exc
 from .utils import blah_decorate
@@ -39,7 +42,6 @@ class File(Page):
         res = res or list(i(1, prop=prop, iiprop=iiprop, rvprop=rvprop,
                             rvlimit=1, rvdir="older", titles=self._title))[0]
         super().load_attributes(res=res)
-        self.repository = res['imagerepository']
         try:
             imageinfo = res['imageinfo'][0]
         except KeyError:
@@ -70,15 +72,29 @@ class File(Page):
         return res
 
     def download(self, fileobj=None, width=None, height=None):
-        # TODO: Width and height
         if not self.exists:
             err = "File {0!r} does not exist"
             raise exc.NonexistentPageError(err.format(self.title))
         if width and height:
             raise TypeError("Cannot specify both width and height")
-        res = self._api.opener.get(self.url)
-        with fileobj or open(self.title.partition(":")[-1], "wb") as fileobj:
-            fileobj.write(res.content)
+        t = quote(self.title.replace(" ", "_"), safe=":/")[5:]
+        url = re.sub(r"(/[a-z0-9]/[a-z0-9]{2}/)", r"/thumb\1", self.url[::-1].replace('/' + t[::-1], '')[::-1])
+        if width:
+            url += "/" + str(width) + "px-" + t
+        elif height:
+            #  width                 X
+            # -------    =     -------------
+            # height           param(height)
+            d = self.dimensions
+            width = d[0] * width / d[1]
+            url += "/" + str(width) + "px-" + t
+        else:
+            url = self.url # Nevermind that stuff
+#        return url
+        res = self._api.opener.get(url)
+        if res.ok:
+            with fileobj or open(self.title.partition(":")[-1], "wb") as fileobj:
+                fileobj.write(res.content)
 
     @property
     @decorate
