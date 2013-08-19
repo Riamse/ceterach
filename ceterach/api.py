@@ -26,7 +26,8 @@ from copy import deepcopy
 
 import requests
 
-from . import __version__ as cv
+#from . import __version__ as cv
+cv = '0.0.1'
 from . import exceptions as exc
 from .category import Category
 from .file import File
