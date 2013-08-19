@@ -23,11 +23,6 @@ import functools
 
 # __all__ and friends are defined at the bottom
 
-class DictThatReturnsNoneInsteadOfRaisingKeyError(dict):
-    def __getitem__(self, item):
-        return super().get(item, None)
-
-
 #def decorate(attr):
 #    def wrapped(self):
 #        return "getattr({!r}, {!r})".format(self, attr)
@@ -59,22 +54,6 @@ def addprop(inst, name, method): # http://stackoverflow.com/a/2954373/1133718
 def isostrptime(stamp):
     """I'm lazy, and can never remember the format string"""
     return datetime.datetime.strptime(stamp, "%Y-%m-%dT%H:%M:%SZ")
-
-def flattened(nested: (list, tuple)) -> list:
-    """
-    For the sake of simplicity, `list` will refer to both lists and tuples.
-    Convert a list of lists (which may possibly contain more lists) into a
-    single one-dimensional list.
-
-    This is comparable to the Perl process of putting an array in an array.
-    """
-    one_d = []
-    for x in nested:
-        if isinstance(x, (list, tuple)):
-            one_d.extend(flattened(x))
-        else:
-            one_d.append(x)
-    return one_d
 
 # Regex to match IPv4 and IPv6 addresses
 v4 = re.compile(r"\b(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}"

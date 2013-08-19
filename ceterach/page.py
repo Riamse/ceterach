@@ -514,7 +514,7 @@ class Page:
 
         If this Page doesn't exist, or is invalid, it will
         raise a NonexistentPageError, or InvalidPageError respectively. If the
-        page isn't a redirect, it will do SOMETHING.
+        page isn't a redirect, it will raise a RedirectError.
 
         :returns: Page object that represents the redirect target.
         :raises: NonexistentPageError, InvalidPageError
