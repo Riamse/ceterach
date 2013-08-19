@@ -26,23 +26,22 @@ from copy import deepcopy
 
 import requests
 
+from . import __version__ as cv
 from . import exceptions as exc
 from .category import Category
 from .file import File
 from .page import Page
 from .user import User
 from .revision import Revision
-from .utils import flattened, DictThatReturnsNoneInsteadOfRaisingKeyError
 
 #stackoverflow.com/questions/3217492/list-of-language-codes-in-yaml-or-json
 
 __all__ = ["MediaWiki"]
 
 USER_AGENT = "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:14.0) Gecko/20100101 Firefox/14.0.1"
-#USER_AGENT = "Ceterach/{0!s} (Python {1!s}; mailto:andrewwang43@gmail.com)"
-#USER_AGENT = USER_AGENT.format(cv, pyv())
-USER_AGENT.format(pyv())
-# TODO: Remember that this part of the file actually exists
+USER_AGENT = "Ceterach/{0!s} (Python {1!s}; mailto:andrewwang43@gmail.com)"
+USER_AGENT = USER_AGENT.format(cv, pyv())
+USER_AGENT = USER_AGENT.format(pyv())
 def_config = {"throttle": 0,
               "maxlag": 5,
               "retries": 0,
@@ -51,7 +50,7 @@ def_config = {"throttle": 0,
 
 class MediaWiki:
 
-    _tokens = DictThatReturnsNoneInsteadOfRaisingKeyError()
+    _tokens = {}
     _namespaces = None
 
 #    def __init__(self, api_url="http://en.wikipedia.org/w/api.php", config=None):
@@ -146,10 +145,7 @@ class MediaWiki:
         """
         return Revision(self, identity)
 
-    def call(self, **params) -> type("", (collections.UserDict, list), {}):
-        # Annotated so the IDE will autocomplete convenient methods.
-        # it may be true that true, false, and null are valid Python objects,
-        # but those don't have any methods worth autocompleting.
+    def call(self, **params):
         """
         Sends an API query to the wiki, with *params* as query parameters.
         Before the request is sent, the 'format' key of *params* will be set
@@ -168,8 +164,6 @@ class MediaWiki:
         params.update({"format": "json"})
         for (k, v) in params.items():
             if isinstance(v, collections.Iterable) and not isinstance(v, str):
-                # We probably don't need this part
-                v = flattened(v)
                 params[k] = "|".join(str(i) for i in v)
         is_get_action = params['action'] in conf['get']
         urlopen = getattr(self.opener, 'get' if is_get_action else 'post')

@@ -31,8 +31,6 @@ def decorate(meth):
 class Revision:
 
     def __init__(self, api, revid):
-        #: :type: ceterach.api.MediaWiki
-        api = api
         self._api = api
         self._revid = revid
 
