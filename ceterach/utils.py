@@ -56,6 +56,7 @@ def isostrptime(stamp):
     return datetime.datetime.strptime(stamp, "%Y-%m-%dT%H:%M:%SZ")
 
 # Regex to match IPv4 and IPv6 addresses
+# I didn't write this, just google it.
 v4 = re.compile(r"\b(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}"
                 r"(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\b")
 v6 = re.compile(r"^\s*((([0-9A-Fa-f]{1,4}:){7}"
@@ -88,20 +89,10 @@ v6 = re.compile(r"^\s*((([0-9A-Fa-f]{1,4}:){7}"
                 r"|(((25[0-5]|2[0-4]\d|[01]?\d{1,2})"
                 r"(\.(25[0-5]|2[0-4]\d|[01]?\d{1,2})){3})))(%.+)?\s*$")
 
-class IPv4Address:
-    """A fake class that represents an IPv4 address"""
-    def __init__(self, address): pass
-
-class IPv6Address:
-    """A fake class that represents an IPv6 address"""
-    def __init__(self, address): pass
-
 def ip_address(address: str):
     err = "{0!r} does not appear to be an IPv4 or IPv6 address"
-    if v4.match(address):
-        return IPv4Address(address)
-    elif v6.match(address):
-        return IPv6Address(address)
+    if v4.match(address) or v6.match(address):
+        return True
     else:
         raise ValueError(err.format(address))
 
