@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 #-------------------------------------------------------------------------------
 # This file is part of Ceterach.
-# Copyright (C) 2012 Riamse <riamse@protonmail.com>
+# Copyright (C) 2013 Riamse <riamse@protonmail.com>
 #
 # Ceterach is free software; you can redistribute it and/or modify it under
 # the terms of the GNU Lesser General Public License as published by the Free
