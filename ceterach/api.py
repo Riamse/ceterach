@@ -288,8 +288,9 @@ class MediaWiki:
 
     def iterator(self, limit=float("inf"), **kwargs):
         """
-        Iterates over an API query.
-        The contents are usually dicts that represent a page.
+        Iterates over an API query, so you no longer have to use something like: ::
+            >>> res = api.call(action="query", ...)
+            >>> blah(res["query"]["pages"][tuple(res["query"]["pages"].keys())[0]][...])
 
         :type limit: numbers.Real
         :param limit: The maximum number of items the iterator will yield.
