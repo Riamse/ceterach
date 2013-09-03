@@ -34,6 +34,12 @@ class Revision:
         self._api = api
         self._revid = revid
 
+    def __eq__(self, other):
+        return other._api == self._api and self.revid == self.revid
+
+    def __ne__(self, other):
+        return other._api != self._api or self.revid != self.revid
+
     def load_attributes(self, res=None):
         self.__load(res)
 
@@ -96,10 +102,10 @@ class Revision:
 
     def rollback(self, summary="", bot=False):
         params = {"title": self.page._api, "user": self.user.name,
-                  "token": self._rvtoken, "action": "rollback"
+                  "token": self.rvtoken, "action": "rollback"
         }
         try:
-            params['token'] = self._rvtoken
+            params['token'] = self.rvtoken
         except AttributeError:
             err = "You do not have the rollback permission"
             raise exc.PermissionError(err)
@@ -114,6 +120,16 @@ class Revision:
 #
 #    def undelete(self):
 #        pass
+
+    @property
+    @decorate
+    def revid(self) -> int:
+        return "_revid"
+
+    @property
+    @decorate
+    def rvtoken(self) -> str:
+        return "_rvtoken"
 
     @property
     @decorate

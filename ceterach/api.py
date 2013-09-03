@@ -96,6 +96,12 @@ class MediaWiki:
         text = "{c}(api_url={api!r}, config={conf!r})"
         return text.format(c=cls_name, api=self.api_url, conf=self.config)
 
+    def __eq__(self, other):
+        return other.api_url == self.api_url
+
+    def __ne__(self, other):
+        return other.api_url != self.api_url
+
     def category(self, identity, follow_redirects=False) -> Category:
         """
         Returns a Category object for *identity*, which represents either a

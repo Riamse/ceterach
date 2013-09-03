@@ -51,6 +51,12 @@ class Page:
         self._pageid = pageid
         self.follow_redirects = follow_redirects
 
+    def __eq__(self, other):
+        return other._api == self._api and self.title == self.title
+
+    def __ne__(self, other):
+        return other._api != self._api or self.title != self.title
+
     def load_attributes(self, res=None):
         """
         Call this to load ``self.__title``, ``._is_redirect``, ``._pageid``,
