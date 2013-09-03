@@ -43,6 +43,12 @@ class User:
         self._api = api
         self._name = name
 
+    def __eq__(self, other):
+        return other._api == self._api and other.name == self.name
+
+    def __ne__(self, other):
+        return other._api != self._api or self.name != self.name
+
     def load_attributes(self, res=None):
         try:
             self._is_ip = bool(ip_address(self.name))
