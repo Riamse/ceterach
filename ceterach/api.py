@@ -20,7 +20,7 @@
 import itertools
 import collections
 from time import time, sleep
-from urllib.parse import urlparse, urlencode
+from urllib.parse import urlparse
 from platform import python_version as pyv
 from copy import deepcopy
 
