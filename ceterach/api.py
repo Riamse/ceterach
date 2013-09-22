@@ -20,7 +20,7 @@
 import itertools
 import collections
 from time import time, sleep
-from urllib.parse import urlparse
+from urllib.parse import urlparse, urlencode
 from platform import python_version as pyv
 from copy import deepcopy
 
@@ -172,11 +172,10 @@ class MediaWiki:
         for (k, v) in params.items():
             if isinstance(v, collections.Iterable) and not isinstance(v, str):
                 params[k] = "|".join(str(i) for i in v)
-        is_get_action = params['action'] in conf['get']
-        urlopen = getattr(self.opener, 'get' if is_get_action else 'post')
-        del is_get_action
+        is_get = params['action'] in conf['get']
+        urlopen = getattr(self.opener, 'get' if is_get else 'post')
         try:
-            res = urlopen(self.api_url, params=params)
+            res = urlopen(self.api_url, **{"params" if is_get else "data": params})
         except (requests.HTTPError, requests.ConnectionError):
             raise exc.ApiError("REQUEST FAILURE.")
         self.last_query = time()
