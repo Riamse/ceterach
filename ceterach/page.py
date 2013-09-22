@@ -184,7 +184,7 @@ class Page:
         res = self._api.call(**edit_params)
         if res['edit']['result'] == "Success":
             # Some attributes are now out of date
-            del self._content
+            del self._content if hasattr(self, "_content") else edit_params
             self._exists = True
             self._revid = res['edit']['newrevid']
             self._title = res['edit']['title'] # Normalise the title again
