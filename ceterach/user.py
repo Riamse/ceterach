@@ -44,10 +44,13 @@ class User:
         self._name = name
 
     def __eq__(self, other):
-        return other._api == self._api and other.name == self.name
+        return getattr(other, '_api', None) == self._api and \
+               getattr(other, 'name', None) == self.name
 
     def __ne__(self, other):
-        return other._api != self._api or self.name != self.name
+        return getattr(other, '_api', None) != self._api or \
+               getattr(other, 'name', None) != self.name
+
 
     def load_attributes(self, res=None):
         try:

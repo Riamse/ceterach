@@ -42,7 +42,6 @@ __all__ = ["MediaWiki"]
 USER_AGENT = "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:14.0) Gecko/20100101 Firefox/14.0.1"
 USER_AGENT = "Ceterach/{0!s} (Python {1!s}; mailto:andrewwang43@gmail.com)"
 USER_AGENT = USER_AGENT.format(cv, pyv())
-USER_AGENT = USER_AGENT.format(pyv())
 def_config = {"throttle": 0,
               "maxlag": 5,
               "retries": 0,
@@ -97,10 +96,10 @@ class MediaWiki:
         return text.format(c=cls_name, api=self.api_url, conf=self.config)
 
     def __eq__(self, other):
-        return other.api_url == self.api_url
+        return getattr(other, 'api_url', None) == self.api_url
 
     def __ne__(self, other):
-        return other.api_url != self.api_url
+        return getattr(other, 'api_url', None) != self.api_url
 
     def category(self, identity, follow_redirects=False) -> Category:
         """

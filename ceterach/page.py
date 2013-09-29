@@ -52,10 +52,12 @@ class Page:
         self.follow_redirects = follow_redirects
 
     def __eq__(self, other):
-        return other._api == self._api and self.title == self.title
+        return getattr(other, '_api', None) == self._api and \ 
+               (getattr(other, 'title', None) == self.title or getattr(other, 'pageid', None) == self.pageid)
 
     def __ne__(self, other):
-        return other._api != self._api or self.title != self.title
+        return getattr(other, '_api', None) == self._api and \ 
+               (getattr(other, 'title', None) == self.title or getattr(other, 'pageid', None) == self.pageid)
 
     def load_attributes(self, res=None):
         """
@@ -184,7 +186,9 @@ class Page:
         res = self._api.call(**edit_params)
         if res['edit']['result'] == "Success":
             # Some attributes are now out of date
-            del self._content if hasattr(self, "_content") else edit_params
+            try:
+                del self._content
+            except AttributeError: pass
             self._exists = True
             self._revid = res['edit']['newrevid']
             self._title = res['edit']['title'] # Normalise the title again
