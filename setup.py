@@ -28,6 +28,9 @@ def read_long_description():
     return open("README.md").read()
 
 required_packages = ['requests>=1.0.3', 'arrow>=0.3.5']
+#TODO: use arrow instead of datetime
+# arrow is good, so you should install it anyway even if this doesn't use it
+# :)
 
 setup(name='ceterach',
       version=__version__,
