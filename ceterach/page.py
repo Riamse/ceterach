@@ -52,11 +52,11 @@ class Page:
         self.follow_redirects = follow_redirects
 
     def __eq__(self, other):
-        return getattr(other, '_api', None) == self._api and \ 
+        return getattr(other, '_api', None) == self._api and \
                (getattr(other, 'title', None) == self.title or getattr(other, 'pageid', None) == self.pageid)
 
     def __ne__(self, other):
-        return getattr(other, '_api', None) == self._api and \ 
+        return getattr(other, '_api', None) == self._api and \
                (getattr(other, 'title', None) == self.title or getattr(other, 'pageid', None) == self.pageid)
 
     def load_attributes(self, res=None):
