@@ -102,7 +102,7 @@ class Page:
             kwargs['pageids'] = self.pageid
         else:
             raise exc.CeterachError("WTF")
-        res = res or list(i(1, **kwargs))[0]
+        res = res or next(i(1, **kwargs))
         # Normalise the page title in case it was entered oddly
         self._title = res['title']
         self._is_redirect = 'redirect' in res
@@ -527,21 +527,21 @@ class Page:
         page isn't a redirect, it will raise a RedirectError.
 
         :returns: Page object that represents the redirect target.
-        :raises: NonexistentPageError, InvalidPageError
+        :raises: NonexistentPageError, InvalidPageError, RedirectError
         """
-        #TODO: finish docstring and make it consistent with actual behaviour
         if not self.exists:
             raise exc.NonexistentPageError("Page does not exist")
         if not self.is_redirect:
-            self._redirect_target = None
-            return None
+            raise exc.RedirectError("Page is not a redirect")
+        if hasattr(self, "_redirect_target"):
+            return self._redirect_target
         redirect_regex = re.compile(r"#redirect\s*?\[\[(.+?)\]\]", re.I)
-        try:
-            target = redirect_regex.match(self.content).group(1)
+        haspage = redirect_regex.match(self.content)
+        if haspage:
+            target = haspage.group(1)
             self._redirect_target = self._api.page(target)
-        except AttributeError:
-            self._redirect_target = None
-        return self._redirect_target
+            return self._redirect_target
+        raise exc.RedirectError("Could not determine redirect target")
 
     @property
     @decorate
