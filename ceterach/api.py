@@ -172,33 +172,46 @@ class MediaWiki:
             if isinstance(v, collections.Iterable) and not isinstance(v, str):
                 params[k] = "|".join(str(i) for i in v)
         is_get = params['action'] in conf['get']
+        raiseme = None
         urlopen = getattr(self.opener, 'get' if is_get else 'post')
         try:
             res = urlopen(self.api_url, **{"params" if is_get else "data": params})
-        except (requests.HTTPError, requests.ConnectionError):
-            raise exc.ApiError("REQUEST FAILURE.")
+        except (requests.HTTPError, requests.ConnectionError) as e:
+            res = lambda: 0
+            res.json = lambda: {}
+            raiseme = exc.ApiError(e)
         self.last_query = time()
-        ret = res.json() # If it fails, it'll raise a ValueError
+        try:
+            ret = res.json()
+        except ValueError:
+            ret = {"error": {"code": "py", "info": "No JSON object could be decoded"}}
         if 'error' in ret:
             if ret['error']['code'] == 'maxlag':
                 try:
                     retries = (int(conf['retries']),)
                 except OverflowError:
                     retries = ()
-                err = "Maximum number of retries reached {0}"
+                err = "Maximum number of retries reached ({0})"
                 for _ in itertools.repeat(None, *retries):
                     sleep(throttle)
                     try:
                         res = urlopen(self.api_url, params=params)
                         ret = res.json()
-                    except (requests.HTTPError, requests.ConnectionError):
-                        raise exc.ApiError("REQUEST FAILURE.")
+                    except (requests.HTTPError, requests.ConnectionError) as e:
+                        raiseme = exc.ApiError(e)
                     if not 'error' in ret:
                         break
                 else:
-                    raise exc.ApiError(err.format(retries))
+                    raiseme = exc.ApiError(err.format(retries))
             else:
-                raise ValueError(ret['error']['info'])
+                raiseme = exc.CeterachError(ret['error']['info'])
+        if raiseme:
+            if not 'error' in ret:
+                code = 'py'
+            else:
+                code = ret["error"].get("code", "py")
+            raiseme.code = code
+            raise raiseme
         return ret
 
     def login(self, username, password):

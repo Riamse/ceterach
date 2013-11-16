@@ -17,8 +17,10 @@
 # along with Ceterach.  If not, see <http://www.gnu.org/licenses/>.
 #-------------------------------------------------------------------------------
 
+
 class CeterachError(Exception):
     """This is the base exception class for exceptions in Ceterach."""
+    code = "py"
 
 if True:
     class NonexistentPageError(CeterachError):
@@ -65,7 +67,7 @@ if True:
             """
 
         class FilterError(EditError):
-            """Base class for edits that are blocked by filters."""
+            """Base class for edits that are blocked by filters and blacklists."""
 
         if True:
             class SpamFilterError(FilterError):

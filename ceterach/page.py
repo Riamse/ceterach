@@ -149,10 +149,11 @@ class Page:
 
     def __edit(self, content, summary, minor, bot, force, edittype):
         title = self.title
-        token = self._api.tokens['edit']
-        if token is None:
-            self._api.set_token("edit")
+        try:
             token = self._api.tokens['edit']
+        except KeyError:
+            self._api.set_token("edit")
+            token = self._api.tokens.get('edit', None)
             if token is None:
                 err = "You do not have the edit permission"
                 raise exc.PermissionsError(err)
@@ -188,7 +189,23 @@ class Page:
             edit_params['prependtext'] = edit_params.pop("text")
         elif edittype == 'create':
             edit_params['createonly'] = edit_params.pop("nocreate")
-        res = self._api.call(**edit_params)
+        try:
+            res = self._api.call(**edit_params)
+        except exc.CeterachError as e:
+            # Make the exception more specific
+            code = e.code.replace("-anon", "")
+            if code in {"articleexists", "editconflict", "pagedeleted"}:
+                e.__class__ = exc.EditConflictError
+            elif code in {"noedit", "noimageredirect",
+                          "protectedtitle", "cantcreate"}:
+                e.__class__ = exc.PermissionsError
+            elif code == "filtered":
+                e.__class__ = exc.EditFilterError
+            elif code == "spamdetected":
+                e.__class__ = exc.SpamFilterError
+            else:
+                e.__class__ = exc.EditError
+            raise
         if res['edit']['result'] == "Success":
             # Some attributes are now out of date
             # unless it was a nochange

@@ -30,6 +30,7 @@ import functools
 #        return getattr(self, attr)
 #    return lambda the_func: wrapped
 
+
 def blah_decorate(meth, message, message_attr, error):
     """I'm lazy"""
     attr = meth(0) # The method should be returning the attribute to get
@@ -43,6 +44,7 @@ def blah_decorate(meth, message, message_attr, error):
         raise error(err)
     return wrapped
 
+
 def addprop(inst, name, method): # http://stackoverflow.com/a/2954373/1133718
     cls = type(inst)
     if not hasattr(cls, '__perinstance'):
@@ -50,6 +52,7 @@ def addprop(inst, name, method): # http://stackoverflow.com/a/2954373/1133718
         cls.__perinstance = True
         inst.__class__ = cls
     setattr(cls, name, property(method))
+
 
 def isostrptime(stamp):
     """I'm lazy, and can never remember the format string"""
@@ -88,6 +91,7 @@ v6 = re.compile(r"^\s*((([0-9A-Fa-f]{1,4}:){7}"
                 r"|((:[0-9A-Fa-f]{1,4}){1,2})))"
                 r"|(((25[0-5]|2[0-4]\d|[01]?\d{1,2})"
                 r"(\.(25[0-5]|2[0-4]\d|[01]?\d{1,2})){3})))(%.+)?\s*$")
+
 
 def ip_address(address: str):
     err = "{0!r} does not appear to be an IPv4 or IPv6 address"
