@@ -51,7 +51,7 @@ if True:
         to the API."""
 
     if True:
-        class PermissionError(EditError):
+        class PermissionsError(EditError):
             """
             Attempted to do something that requires rights you don't have.
             For instance, a non-admin tried to edit a full-protected page.

@@ -112,7 +112,7 @@ class User:
             if cc:
                 params['ccme'] = True
             return self._api.call(**params)
-        raise exc.PermissionError("The user can't be emailed!")
+        raise exc.PermissionsError("The user can't be emailed!")
 
     def create(self, password, email="", realname="", logout=True):
         return self._api.create_account(self.name, password, email, realname, logout)
