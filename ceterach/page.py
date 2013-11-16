@@ -28,17 +28,20 @@ from .utils import isostrptime, blah_decorate
 
 __all__ = ["Page"]
 
+
 def decorate(meth):
     msg = "Page {0!r} does not exist"
     attr = "title"
     err = exc.NonexistentPageError
     return blah_decorate(meth, msg, attr, err)
 
+
 class Page:
     """
     This represents a page on a wiki, and has attributes that ease the process
     of getting information about the page.
     """
+
     def __init__(self, api, title='', pageid=0, follow_redirects=False):
         self._api = api
         if pageid is 0 and title is '':
@@ -152,16 +155,18 @@ class Page:
             token = self._api.tokens['edit']
             if token is None:
                 err = "You do not have the edit permission"
-                raise exc.PermissionError(err)
+                raise exc.PermissionsError(err)
         edit_params = {"action": "edit", "title": title, "text": content,
-                       "token": token, "summary": summary}
-        edit_params['notbot'] = 1
+                       "token": token, "summary": summary
+        }
+        # Apparently English Wikipedia doesn't recognise this anymore
+        #edit_params['notbot'] = 1
         edit_params['notminor'] = 1
         edit_params['nocreate'] = 1
         if minor:
             edit_params['minor'] = edit_params.pop("notminor")
         if bot:
-            edit_params['bot'] = edit_params.pop("notbot")
+            edit_params['bot'] = 1
         if force is False:
             detect_ec = dict(prop="revisions", rvprop="timestamp", titles=title)
             ec_timestamp_res = tuple(self._api.iterator(1, **detect_ec))[0]
@@ -186,12 +191,14 @@ class Page:
         res = self._api.call(**edit_params)
         if res['edit']['result'] == "Success":
             # Some attributes are now out of date
+            # unless it was a nochange
             try:
                 del self._content
-            except AttributeError: pass
+                self._revid = res['edit']['newrevid']
+            except (AttributeError, KeyError):
+                pass
             self._exists = True
-            self._revid = res['edit']['newrevid']
-            self._title = res['edit']['title'] # Normalise the title again
+            self._title = res['edit']['title']  # Normalise the title again
         return res
 
     def edit(self, content, summary="", minor=False, bot=False, force=False):
@@ -332,8 +339,8 @@ class Page:
             self._api.set_token("move")
             if move_params['token'] is None:
                 err = "You do not have the move permission"
-                raise exc.PermissionError(err)
-#        allowed = ("movetalk", "movesubpages", "noredirect", "watch", "unwatch")
+                raise exc.PermissionsError(err)
+        #allowed = ("movetalk", "movesubpages", "noredirect", "watch", "unwatch")
         return self._api.call(**move_params)
 
     def delete(self, reason=""):
@@ -352,7 +359,7 @@ class Page:
             self._api.set_token("delete")
             if not self._api.tokens['delete']:
                 err = "You do not have the delete permission"
-                raise exc.PermissionError(err)
+                raise exc.PermissionsError(err)
             stuff['token'] = self._api.tokens['delete']
         return self._api.call(stuff)
 
@@ -372,7 +379,7 @@ class Page:
             self._api.set_token("undelete")
             if not self._api.tokens['undelete']:
                 err = "You do not have the delete permission"
-                raise exc.PermissionError(err)
+                raise exc.PermissionsError(err)
             stuff['token'] = self._api.tokens['undelete']
         return self._api.call(stuff)
 

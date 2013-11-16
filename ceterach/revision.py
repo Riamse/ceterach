@@ -110,7 +110,7 @@ class Revision:
             params['token'] = self.rvtoken
         except AttributeError:
             err = "You do not have the rollback permission"
-            raise exc.PermissionError(err)
+            raise exc.PermissionsError(err)
         if summary is not None:
             params['summary'] = summary
         if bot:
