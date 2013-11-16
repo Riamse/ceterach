@@ -196,7 +196,7 @@ class Page:
             code = e.code.replace("-anon", "")
             if code in {"articleexists", "editconflict", "pagedeleted"}:
                 e.__class__ = exc.EditConflictError
-            elif code in {"noedit", "noimageredirect",
+            elif code in {"noedit", "noimageredirect", "protectedpage"
                           "protectedtitle", "cantcreate"}:
                 e.__class__ = exc.PermissionsError
             elif code == "filtered":
