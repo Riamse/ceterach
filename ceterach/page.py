@@ -195,17 +195,17 @@ class Page:
             # Make the exception more specific
             code = e.code.replace("-anon", "")
             if code in {"articleexists", "editconflict", "pagedeleted"}:
-                e.__class__ = exc.EditConflictError
-            elif code in {"noedit", "noimageredirect", "protectedpage"
+                e = exc.EditConflictError(e)
+            elif code in {"noedit", "noimageredirect", "protectedpage",
                           "protectedtitle", "cantcreate"}:
-                e.__class__ = exc.PermissionsError
+                e = exc.PermissionsError(e)
             elif code == "filtered":
-                e.__class__ = exc.EditFilterError
+                e = exc.EditFilterError(e)
             elif code == "spamdetected":
-                e.__class__ = exc.SpamFilterError
+                e = exc.SpamFilterError(e)
             else:
-                e.__class__ = exc.EditError
-            raise
+                e = exc.EditError(e)
+            raise e
         if res['edit']['result'] == "Success":
             # Some attributes are now out of date
             # unless it was a nochange
