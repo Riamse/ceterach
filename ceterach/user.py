@@ -93,26 +93,33 @@ class User:
             self._blockinfo = {"by": None, "reason": None, "expiry": None}
         self._groups = tuple(res.get("groups", ""))
         self._editcount = res.get("editcount", 0)
-        reg = res.get("registration", None) # For IP addresses
+        reg = res.get("registration", None)  # For IP addresses
         try:
             self._registration = isostrptime(reg)
         except TypeError:
             # Sometimes the API doesn't give a date; the user's probably really
             # old. There's nothing else we can do!
-            self._registration = datetime.utcfromtimestamp(0) # earlier than datetime.min
+            self._registration = datetime.min
         self._emailable = 'emailable' in res
 
     def email(self, subject, text, cc=True):
         if not hasattr(self, "_emailable"):
             self.load_attributes()
-        if self._emailable:
-            params = {"action": "emailuser", "target": self.name,
-                      "subject": subject, "text": text
-            }
-            if cc:
-                params['ccme'] = True
+        if not self.is_emailable:
+            raise exc.PermissionsError("This user cannot be emailed")
+        params = {"action": "emailuser", "target": self.name,
+                  "subject": subject, "text": text
+        }
+        if cc:
+            params['ccme'] = True
+        try:
             return self._api.call(**params)
-        raise exc.PermissionsError("The user can't be emailed!")
+        except exc.CeterachError as e:
+            code = e.code
+            if code != 'py':
+                e = exc.PermissionsError(e)
+            raise e from e
+
 
     def create(self, password, email="", realname="", logout=True):
         return self._api.create_account(self.name, password, email, realname, logout)
