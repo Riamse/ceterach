@@ -21,6 +21,7 @@
 class CeterachError(Exception):
     """This is the base exception class for exceptions in Ceterach."""
     code = "py"
+
     def __init__(self, message, *args, **kwargs):
         if isinstance(message, CeterachError):
             self.code = message.code

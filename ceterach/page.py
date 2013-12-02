@@ -203,9 +203,9 @@ class Page:
                 e = exc.EditFilterError(e)
             elif code == "spamdetected":
                 e = exc.SpamFilterError(e)
-            else:
+            elif code != "py":
                 e = exc.EditError(e)
-            raise e
+            raise e from e  # Suppress context, apparently this works
         if res['edit']['result'] == "Success":
             # Some attributes are now out of date
             # unless it was a nochange
