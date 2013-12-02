@@ -120,7 +120,6 @@ class User:
                 e = exc.PermissionsError(e)
             raise e from e
 
-
     def create(self, password, email="", realname="", logout=True):
         return self._api.create_account(self.name, password, email, realname, logout)
 
