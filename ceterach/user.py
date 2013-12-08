@@ -51,7 +51,6 @@ class User:
         return getattr(other, '_api', None) != self._api or \
                getattr(other, 'name', None) != self.name
 
-
     def load_attributes(self, res=None):
         try:
             self._is_ip = bool(ip_address(self.name))
@@ -105,23 +104,18 @@ class User:
     def email(self, subject, text, cc=True):
         if not hasattr(self, "_emailable"):
             self.load_attributes()
-        if not self.is_emailable:
-            raise exc.PermissionsError("This user cannot be emailed")
-        params = {"action": "emailuser", "target": self.name,
-                  "subject": subject, "text": text
-        }
-        if cc:
-            params['ccme'] = True
-        try:
+        if self._emailable:
+            params = {"action": "emailuser", "target": self.name,
+                      "subject": subject, "text": text
+            }
+            if cc:
+                params['ccme'] = True
             return self._api.call(**params)
-        except exc.CeterachError as e:
-            code = e.code
-            if code != 'py':
-                e = exc.PermissionsError(e)
-            raise e from e
+        raise exc.PermissionsError("The user can't be emailed!")
 
     def create(self, password, email="", realname="", logout=True):
-        return self._api.create_account(self.name, password, email, realname, logout)
+        raise NotImplementedError
+        # return self._api.create_account(self.name, password, email, realname, logout)
 
     @property
     @decorate
