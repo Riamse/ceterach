@@ -104,14 +104,20 @@ class User:
     def email(self, subject, text, cc=True):
         if not hasattr(self, "_emailable"):
             self.load_attributes()
-        if self._emailable:
-            params = {"action": "emailuser", "target": self.name,
-                      "subject": subject, "text": text
-            }
-            if cc:
-                params['ccme'] = True
+        if not self.is_emailable:
+            raise exc.PermissionsError("This user cannot be emailed")
+        params = {"action": "emailuser", "target": self.name,
+                  "subject": subject, "text": text
+        }
+        if cc:
+            params['ccme'] = True
+        try:
             return self._api.call(**params)
-        raise exc.PermissionsError("The user can't be emailed!")
+        except exc.CeterachError as e:
+            code = e.code
+            if code != 'py':
+                e = exc.PermissionsError(e)
+            raise e from e
 
     def create(self, password, email="", realname="", logout=True):
         raise NotImplementedError
