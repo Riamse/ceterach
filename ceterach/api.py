@@ -44,7 +44,7 @@ USER_AGENT = "Ceterach/{0!s} (Python {1!s}; mailto:andrewwang43@gmail.com)"
 USER_AGENT = USER_AGENT.format(cv, pyv())
 def_config = {"throttle": 0,
               "maxlag": 5,
-              "retries": 0,
+              "retries": 1,
               "get": ('query', 'purge'),
 }
 
@@ -203,7 +203,7 @@ class MediaWiki:
                     if not 'error' in ret:
                         break
                 else:
-                    raiseme = exc.ApiError(err.format(retries))
+                    raiseme = exc.ApiError(err.format(retries[0]))
             else:
                 raiseme = exc.CeterachError(ret['error']['info'])
         if raiseme:
