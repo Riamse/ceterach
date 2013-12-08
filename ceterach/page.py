@@ -62,6 +62,21 @@ class Page:
         return getattr(other, '_api', None) == self._api and \
                (getattr(other, 'title', None) == self.title or getattr(other, 'pageid', None) == self.pageid)
 
+    def identity(self):
+        """
+        Return a {key: value} that can be used in API queries.
+
+        It should probably return None or raise an exception if nothing useful
+        could be found. One day, it will.
+
+        :returns: {"pageids": ...}, {"titles": ...}, or {"revids": ...}
+        """
+        l = (("titles", "title"),  ("pageids", "pageid"), ("revids", "revid"))
+        l = ((k, getattr(self, v, None)) for k, v in l)
+        for k, v in l:
+            if v: return {k: v}
+
+
     def load_attributes(self, res=None):
         """
         Call this to load ``self.__title``, ``._is_redirect``, ``._pageid``,
@@ -148,7 +163,8 @@ class Page:
         self._categories = tuple(c(x['title']) for x in cats)
 
     def __edit(self, content, summary, minor, bot, force, edittype):
-        title = self.title
+        ident_s = self.identity()
+        ident = {k[:-1]: v for (k, v) in ident_s.items()}
         try:
             token = self._api.tokens['edit']
         except KeyError:
@@ -157,9 +173,9 @@ class Page:
             if token is None:
                 err = "You do not have the edit permission"
                 raise exc.PermissionsError(err)
-        edit_params = {"action": "edit", "title": title, "text": content,
-                       "token": token, "summary": summary
-        }
+        edit_params = dict(action="edit", text=content, token=token,
+                           summary=summary, **ident
+        )
         # Apparently English Wikipedia doesn't recognise this anymore
         #edit_params['notbot'] = 1
         edit_params['notminor'] = 1
@@ -169,8 +185,8 @@ class Page:
         if bot:
             edit_params['bot'] = 1
         if force is False:
-            detect_ec = dict(prop="revisions", rvprop="timestamp", titles=title)
-            ec_timestamp_res = tuple(self._api.iterator(1, **detect_ec))[0]
+            detect_ec = dict(prop="revisions", rvprop="timestamp", **ident_s)
+            ec_timestamp_res = next(self._api.iterator(1, **detect_ec))
             if 'missing' in ec_timestamp_res and edittype != 'create':
                 err = "Use the 'create' method to create pages"
                 raise exc.NonexistentPageError(err)
@@ -428,8 +444,8 @@ class Page:
                   "rvlimit": 'max' if num == float("inf") else num,
                   "rvdir": "older",
                   "rvstartid": self.revid,
-                  "titles": self._title,
         }
+        kwargs.update(self.identity())
         res = self._api.call(**kwargs)
         revs = tuple(res['query']['pages'].values())[0]['revisions']
         for r in revs:
