@@ -44,7 +44,7 @@ USER_AGENT = "Ceterach/{0!s} (Python {1!s}; mailto:andrewwang43@gmail.com)"
 USER_AGENT = USER_AGENT.format(cv, pyv())
 def_config = {"throttle": 0,
               "maxlag": 5,
-              "retries": 1,
+              "retries": 0,
               "get": ('query', 'purge'),
 }
 
@@ -53,11 +53,11 @@ class MediaWiki:
     _tokens = {}
     _namespaces = None
 
-    def __init__(self, api_url="http://en.wikipedia.org/w/api.php", config=None):
-#    def __init__(self, api_url="http://test.wikipedia.org/w/api.php", config=None):
+#    def __init__(self, api_url="http://en.wikipedia.org/w/api.php", config=None):
 #    def __init__(self, api_url="http://wiki.ciit.zp.ua/api.php", config=None): # 1.16
 #    def __init__(self, api_url="http://wiki.mako.cc/api.php", config=None): # 1.19
-#    def __init__(self, api_url="http://localhost:8080/srv/mediawiki/api.php", config=None): # 1.20
+    def __init__(self, api_url="http://test.wikipedia.org/w/api.php", config=None): # newest
+    # def __init__(self, api_url="http://localhost:8080/srv/mediawiki/api.php", config=None): # 1.20
         """
         *api_url* is the full url to the wiki's API (default:
         ``"http://en.wikipedia.org/w/api.php"``).
@@ -185,7 +185,6 @@ class MediaWiki:
         try:
             ret = res.json()
         except ValueError:
-            #print(res.text)
             ret = {"error": {"code": "py", "info": "No JSON object could be decoded"}}
         if 'error' in ret:
             if ret['error']['code'] == 'maxlag':
@@ -204,7 +203,7 @@ class MediaWiki:
                     if not 'error' in ret:
                         break
                 else:
-                    raiseme = exc.ApiError(err.format(retries[0]))
+                    raiseme = exc.ApiError(err.format(retries))
             else:
                 raiseme = exc.CeterachError(ret['error']['info'])
         if raiseme:
@@ -355,7 +354,7 @@ class MediaWiki:
                 for p_, n in res['query-continue'].items():
                     for k, v in n.items():
                         c[k] = v
-                        p[p_] = 1
+                        p[p_] = 1  # what is this even doing here
             else:
                 return
             kwargs.update(c)
