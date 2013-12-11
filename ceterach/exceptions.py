@@ -19,13 +19,21 @@
 
 
 class CeterachError(Exception):
-    """This is the base exception class for exceptions in Ceterach."""
+    """This is the base exception class for exceptions in Ceterach.
+
+    :param message: The message, stored in ``self.msg``
+    :param code: The error code, stored in ``self.code``
+    """
     code = "py"
 
-    def __init__(self, message, *args, **kwargs):
-        if isinstance(message, CeterachError):
-            self.code = message.code
-        super().__init__(message, *args, **kwargs)
+    def __init__(self, message, code=None):
+        self.msg = message
+        if code or isinstance(message, CeterachError):
+            self.code = code or message.code
+        super().__init__(message)
+
+    def __str__(self):
+        return ": ".join(map(repr, [self.code, self.msg]))
 
 if True:
     class NonexistentPageError(CeterachError):
@@ -80,5 +88,3 @@ if True:
 
             class EditFilterError(FilterError):
                 """MediaWiki edit filter blocked the edit."""
-
-__all__ = [x.__name__ for x in vars().values() if isinstance(x, Exception)]

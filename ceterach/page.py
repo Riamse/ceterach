@@ -232,6 +232,14 @@ class Page:
                 pass
             self._exists = True
             self._title = res['edit']['title']  # Normalise the title again
+        elif res['edit']['result'] == "Failure":
+            for reason in res['edit'].keys() - {"result"}:
+                break
+            else:
+                reason = None
+            err = res['edit'][reason] if reason else "Unknown error"
+            e = exc.EditError(err, code=reason or "unknownerror")
+            raise e
         return res
 
     def edit(self, content, summary="", minor=False, bot=False, force=False):
