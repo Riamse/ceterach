@@ -265,7 +265,7 @@ class MediaWiki:
         query = {"action": "tokens", "type": received}
         try:
             res = self.call(**query)
-        except exc.ApiError:
+        except exc.CeterachError:
             # The wiki does not support action=tokens
             query = {"prop": "info", "titles": "some random title",
                      "action": "query", "intoken": received}
