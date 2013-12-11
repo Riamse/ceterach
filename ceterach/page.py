@@ -239,6 +239,8 @@ class Page:
                 reason = None
             err = res['edit'][reason] if reason else "Unknown error"
             e = exc.EditError(err, code=reason or "unknownerror")
+            if reason == "spamblacklist":
+                e = exc.SpamFilterError(err, code=reason)
             raise e
         return res
 
