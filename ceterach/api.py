@@ -166,7 +166,8 @@ class MediaWiki:
         throttle = conf['throttle']
         if time_since_last_query < throttle:
             sleep(throttle - time_since_last_query)
-        params.setdefault("maxlag", conf['maxlag'])
+        maxlag = conf['maxlag']
+        params.setdefault("maxlag", maxlag)
         params.setdefault("action", "query")
         params.update({"format": "json"})
         for (k, v) in params.items():
@@ -178,6 +179,7 @@ class MediaWiki:
         try:
             res = urlopen(self.api_url, **{"params" if is_get else "data": params})
         except (requests.HTTPError, requests.ConnectionError) as e:
+            # We need something that can be arbitrarily assigned attributes
             res = lambda: 0
             res.json = lambda: {}
             raiseme = exc.ApiError(e)
@@ -194,7 +196,7 @@ class MediaWiki:
                     retries = ()
                 err = "Maximum number of retries reached ({0})"
                 for _ in itertools.repeat(None, *retries):
-                    sleep(throttle)
+                    sleep(maxlag)
                     try:
                         res = urlopen(self.api_url, params=params)
                         ret = res.json()
