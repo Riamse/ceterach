@@ -43,6 +43,11 @@ class User:
         self._api = api
         self._name = name
 
+    def __repr__(self):
+        cls_name = type(self).__name__
+        text = "{c}(api={self._api!r}, name={self.name!r})"
+        return text.format(c=cls_name, self=self)
+
     def __eq__(self, other):
         return getattr(other, '_api', None) == self._api and \
                getattr(other, 'name', None) == self.name
