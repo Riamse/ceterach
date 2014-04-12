@@ -17,8 +17,9 @@
 # along with Ceterach.  If not, see <http://www.gnu.org/licenses/>.
 #-------------------------------------------------------------------------------
 
+# Pretty sure we don't even need this file anymore, except for blah_decorate
+
 import re
-import datetime
 import functools
 
 # __all__ and friends are defined at the bottom
