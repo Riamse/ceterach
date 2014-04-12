@@ -25,7 +25,10 @@ except ImportError:
 from ceterach import __version__
 
 def read_long_description():
-    return open("README.md").read()
+    try:
+        return open("README.md").read()
+    except FileNotFoundError:
+        return ''
 
 required_packages = ['requests>=1.0.3', 'arrow>=0.3.5']
 #TODO: use arrow instead of datetime
