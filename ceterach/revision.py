@@ -34,6 +34,11 @@ class Revision:
         self._api = api
         self._revid = revid
 
+    def __repr__(self):
+        cls_name = type(self).__name__
+        text = "{c}(api={self._api!r}, revid={self.revid!r})"
+        return text.format(c=cls_name, self=self)
+
     def __eq__(self, other):
         return getattr(other, '_api', None) == self._api and \
                getattr(other, 'revid', None) == self.revid

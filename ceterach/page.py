@@ -54,6 +54,12 @@ class Page:
         self._pageid = pageid
         self.follow_redirects = follow_redirects
 
+    def __repr__(self):
+        cls_name = type(self).__name__
+        text = "{c}(api={self._api!r}, title={self.title!r}, pageid={self.pageid!r}, " \
+               "follow_redirects={self.follow_redirects!r})"
+        return text.format(c=cls_name, self=self)
+
     def __eq__(self, other):
         return getattr(other, '_api', None) == self._api and \
                (getattr(other, 'title', None) == self.title or getattr(other, 'pageid', None) == self.pageid)
