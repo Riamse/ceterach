@@ -89,7 +89,7 @@ class File(Page):
             width = d[0] * width / d[1]
             url += "/" + str(width) + "px-" + t
         else:
-            url = self.url # Nevermind that stuff
+            url = self.url  # Nevermind that stuff
 #        return url
         res = self._api.opener.get(url)
         if res.ok:
