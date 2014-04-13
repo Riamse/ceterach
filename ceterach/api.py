@@ -43,14 +43,16 @@ __all__ = ["MediaWiki"]
 USER_AGENT = "Ceterach/{0!s} (Python {1!s}; mailto:riamse@protonmail.com)"
 USER_AGENT = USER_AGENT.format(cv, pyv())
 def_config = {"throttle": 0,
-              "maxlag": 5,
               "retries": 1,
+              "sleep": 5,
               "get": ('query', 'purge'),
+              "defaults": {"maxlag": 5, "assert": "user"},
 }
+
 
 class MediaWiki:
 
-    _tokens = {}
+    _tokens = None
     _namespaces = None
 
 #    def __init__(self, api_url="http://en.wikipedia.org/w/api.php", config=None):
@@ -66,20 +68,30 @@ class MediaWiki:
 
         - *throttle*, the number of seconds to wait in between
           requests (default: ``0``).
-        - *maxlag*, the maximum number of seconds the wiki's slave
-          servers are allowed to lag until stopping the
-          request (default: ``5``). For more information, see `MediaWiki
-          docs <http://www.mediawiki.org/wiki/Manual:Maxlag>`_\.
-        - *retries*, how many times to retry after an error (default: ``0``).
+        - *retries*, how many times to retry after an error (default: ``1``).
           You can use ``float("inf")`` for an indefinite number of times.
+        - *sleep*, the number of seconds to sleep between each retry after an
+          error (default: ``5``).
         - *get*, a tuple of which modules can accept GET requests, which
           can vary from wiki to wiki (default: ``("query", "purge")``).
+        - *defaults*, a dict that comprises additional parameters to be sent
+          with each request. These can be overwritten on an individual basis
+          by explicitly specifying the parameter in ``MediaWiki.call``
+          (default: ``{"maxlag": 5, "assert": "user"}``.
+
+          The default parameters are:
+                   - *maxlag*, the maximum number of seconds the wiki's slave
+                     servers are allowed to lag until stopping the
+                     request (default: ``5``). For more information, see
+                     `MediaWiki
+                     docs <http://www.mediawiki.org/wiki/Manual:Maxlag>`_\.
 
         *config* can be a dictionary that only contains those parameters you
         wish to modify. Passing ``{"throttle": 3.14}``, for example, will
         result in a dictionary with the above parameters, except the throttle
         will be 3.14.
         """
+        self._tokens = {}
         o = urlparse(api_url)
         if not o.path.endswith("api.php"):
             raise ValueError("Not an API url")
@@ -93,8 +105,8 @@ class MediaWiki:
 
     def __repr__(self):
         cls_name = type(self).__name__
-        text = "{c}(api_url={api!r}, config={conf!r})"
-        return text.format(c=cls_name, api=self.api_url, conf=self.config)
+        text = "{c}(api_url={self.api_url!r}, config={self.config!r})"
+        return text.format(c=cls_name, self=self)
 
     def __eq__(self, other):
         return getattr(other, 'api_url', None) == self.api_url
@@ -161,15 +173,15 @@ class MediaWiki:
         If everything succeeded, the JSON data will be coerced to a Python
         object and returned.
         """
-        conf = self.config
         time_since_last_query = time() - self.last_query
+        conf = self.config
+        for (k, v) in conf['defaults'].items():
+            params.setdefault(k, v)
         throttle = conf['throttle']
         if time_since_last_query < throttle:
             sleep(throttle - time_since_last_query)
-        maxlag = conf['maxlag']
-        params.setdefault("maxlag", maxlag)
         params.setdefault("action", "query")
-        params.update({"format": "json"})
+        params['format'] = 'json'
         for (k, v) in params.items():
             if isinstance(v, collections.Iterable) and not isinstance(v, str):
                 params[k] = "|".join(str(i) for i in v)
@@ -196,7 +208,7 @@ class MediaWiki:
                     retries = ()
                 err = "Maximum number of retries reached ({0})"
                 for _ in itertools.repeat(None, *retries):
-                    sleep(maxlag)
+                    sleep(conf['sleep'])
                     try:
                         res = urlopen(self.api_url, params=params)
                         ret = res.json()
