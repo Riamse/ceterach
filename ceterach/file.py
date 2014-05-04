@@ -104,24 +104,25 @@ class File(Page):
     @property
     @decorate
     def mime(self) -> str:
+        """The mime type of the file"""
         return "_mime"
 
     @property
     @decorate
     def hash(self) -> str:
+        """The SHA1 hash of the file content"""
         return "_hash"
 
     @property
     @decorate
     def size(self) -> int:
+        """The file size in bytes"""
         return "_size"
 
     @property
     @decorate
     def dimensions(self) -> tuple:
-        """
-        :returns: (width, height)
-        """
+        """(width, height)"""
         return "_dimensions"
 
     @property
@@ -129,6 +130,6 @@ class File(Page):
     def uploader(self):
         """
         :returns: A User object representing the user who uploaded the most
-        recent revision of the file.
+                  recent revision of the file.
         """
         return "_uploader"
