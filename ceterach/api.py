@@ -370,30 +370,6 @@ class MediaWiki:
                 return
             kwargs.update(c)
 
-    def purge(self, **kwargs):
-        """
-        Takes *kwargs* and purges them.
-
-        This implements the iterator method, so in order to actually purge
-        the pages, it iterates over the generator by returning a tuple.
-
-        A dict within the tuple will contain the 'purged' key if the page
-        was successfully purged.
-
-        :param kwargs: The single keyword must be 'titles', 'pageids', or
-         'revids'. The value must be a list of pages to purge, representing
-         page titles, page ids, or revision ids.
-        :returns: A tuple of dicts.
-        """
-        allowed = {"titles", "pageids", "revids"}
-        if len(kwargs) > 1:
-            err = "Cannot supply multiple sources of pages to purge"
-            raise TypeError(err)
-        elif tuple(kwargs)[0] not in allowed:
-            err = "Invalid parameter {0!r}; keyword must be in {1!r}"
-            raise ValueError(err.format(tuple(kwargs)[0], allowed))
-        return tuple(self.iterator(action='purge', **kwargs))
-
     @property
     def tokens(self):
         return deepcopy(self._tokens)
