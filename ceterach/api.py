@@ -40,8 +40,8 @@ from .revision import Revision
 __all__ = ["MediaWiki"]
 
 #USER_AGENT = "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:14.0) Gecko/20100101 Firefox/14.0.1"
-USER_AGENT = "Ceterach/{0!s} (Python {1!s}; mailto:andrewwang43@gmail.com)"
-USER_AGENT = USER_AGENT.format(cv, pyv())
+USER_AGENT = "Ceterach/%s (Python %s; mailto:andrewwang43@gmail.com)"
+USER_AGENT %= cv, pyv()
 def_config = {"throttle": 0,
               "retries": 1,
               "sleep": 5,
