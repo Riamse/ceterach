@@ -273,7 +273,7 @@ class MediaWiki:
         allowed = set("block delete edit email import move "
                       "options patrol protect unblock watch".split())
         if not args:
-            args = allowed
+            args = {"edit"}
         received = set(args)
         received = received & allowed
         query = {"action": "tokens", "type": received}
