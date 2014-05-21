@@ -52,9 +52,6 @@ def_config = {"throttle": 0,
 
 class MediaWiki:
 
-    _tokens = None
-    _namespaces = None
-
 #    def __init__(self, api_url="http://en.wikipedia.org/w/api.php", config=None):
 #    def __init__(self, api_url="http://wiki.ciit.zp.ua/api.php", config=None): # 1.16
 #    def __init__(self, api_url="http://wiki.mako.cc/api.php", config=None): # 1.19
