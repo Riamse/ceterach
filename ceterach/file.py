@@ -71,14 +71,16 @@ class File(Page):
             self._exists = True
         return res
 
-    def download(self, fileobj=None, width=None, height=None):
+    def url(self, width=None, height=None) -> str:
+        """A direct link to the file"""
         if not self.exists:
             err = "File {0!r} does not exist"
             raise exc.NonexistentPageError(err.format(self.title))
         if width and height:
             raise TypeError("Cannot specify both width and height")
         t = quote(self.title.replace(" ", "_"), safe=":/")[5:]
-        url = re.sub(r"(/[a-z0-9]/[a-z0-9]{2}/)", r"/thumb\1", self.url[::-1].replace('/' + t[::-1], '')[::-1])
+        url = self._url
+        url = re.sub(r"(/[a-z0-9]/[a-z0-9]{2}/)", r"/thumb\1", url[::-1].replace('/' + t[::-1], '')[::-1])
         if width:
             url += "/" + str(width) + "px-" + t
         elif height:
@@ -88,18 +90,7 @@ class File(Page):
             d = self.dimensions
             width = d[0] * width / d[1]
             url += "/" + str(width) + "px-" + t
-        else:
-            url = self.url  # Nevermind that stuff
-#        return url
-        res = self._api.opener.get(url)
-        if res.ok:
-            with fileobj or open(self.title.partition(":")[-1], "wb") as fileobj:
-                fileobj.write(res.content)
-
-    @property
-    @decorate
-    def url(self) -> str:
-        return "_url"
+        return url
 
     @property
     @decorate
