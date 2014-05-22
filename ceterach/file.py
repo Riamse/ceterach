@@ -88,7 +88,7 @@ class File(Page):
             # -------    =     -------------
             # height           param(height)
             d = self.dimensions
-            width = d[0] * width / d[1]
+            width = round(d[0] * height / d[1])
             url += "/" + str(width) + "px-" + t
         return url
 
