@@ -89,6 +89,7 @@ class MediaWiki:
         will be 3.14.
         """
         self._tokens = {}
+        self._namespaces = None
         o = urlparse(api_url)
         if not o.path.endswith("api.php"):
             raise ValueError("Not an API url")
