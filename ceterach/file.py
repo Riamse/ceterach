@@ -55,7 +55,6 @@ class File(Page):
         self._dimensions = imageinfo['width'], imageinfo['height']
 
     def upload(self, fileobj, text, summary, watch=False, key=''):
-        fileobj.seek(0)
         contents = fileobj.read()
         post_params = {"filename": self.title, "text": text,
                        "comment": summary, "watch": watch,
