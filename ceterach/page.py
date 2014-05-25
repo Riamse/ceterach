@@ -126,7 +126,7 @@ class Page:
             kwargs['pageids'] = self.pageid
         else:
             raise exc.CeterachError("WTF")
-        res = res or next(i(1, **kwargs))
+        res = res or next(i(1, use_defaults=False, **kwargs))
         # Normalise the page title in case it was entered oddly
         self._title = res['title']
         self._is_redirect = 'redirect' in res
@@ -448,7 +448,7 @@ class Page:
                   "rvprop": ("user", "content"),
                   "revids": revid,
         }
-        res = self._api.iterator(**kwargs)
+        res = self._api.iterator(use_defaults=False, **kwargs)
         p = type(self)(self._api, "some random title")
         p.load_attributes(tuple(res)[0])
         return p
@@ -462,7 +462,7 @@ class Page:
                   "rvstartid": self.revid,
         }
         kwargs.update(self.identity())
-        res = self._api.call(**kwargs)
+        res = self._api.call(use_defaults=False, **kwargs)
         revs = tuple(res['query']['pages'].values())[0]['revisions']
         for r in revs:
             revision_obj = Revision(self._api, r['revid'])

@@ -64,7 +64,8 @@ class User:
         props = ("blockinfo", "groups", "rights", "editcount",
                  "registration", "emailable", "gender",
         )
-        res = res or self._api.call(action="query", list="users",
+        res = res or self._api.call(use_defaults=False,
+                                    action="query", list="users",
                                     ususers=self._name,
                                     usprop=props)['query']['users'][0]
         # normalize our username in case it was entered oddly
