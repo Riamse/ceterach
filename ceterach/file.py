@@ -39,7 +39,8 @@ class File(Page):
         prop = 'info', 'revisions', 'categories', 'imageinfo'
         rvprop = 'user', 'content'
         iiprop = 'size', 'mime', 'sha1', 'url', 'user'
-        res = res or list(i(1, prop=prop, iiprop=iiprop, rvprop=rvprop,
+        res = res or list(i(1, use_defaults=False,
+                            prop=prop, iiprop=iiprop, rvprop=rvprop,
                             rvlimit=1, rvdir="older", titles=self._title))[0]
         super().load_attributes(res=res)
         try:

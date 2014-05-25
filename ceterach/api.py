@@ -162,7 +162,7 @@ class MediaWiki:
         """
         return Revision(self, identity)
 
-    def call(self, **params):
+    def call(self, use_defaults=True, **params):
         """
         Sends an API query to the wiki, with *params* as query parameters.
         Before the request is sent, the 'format' key of *params* will be set
@@ -173,8 +173,9 @@ class MediaWiki:
         """
         time_since_last_query = time() - self.last_query
         conf = self.config
-        for (k, v) in conf['defaults'].items():
-            params.setdefault(k, v)
+        if use_defaults:
+            for (k, v) in conf['defaults'].items():
+                params.setdefault(k, v)
         throttle = conf['throttle']
         if time_since_last_query < throttle:
             sleep(throttle - time_since_last_query)
@@ -238,12 +239,12 @@ class MediaWiki:
         :returns: True if the login succeeded, False if not.
         """
         params = {"action": "login", "lgname": username, "lgpassword": password}
-        result = self.call(**params)
+        result = self.call(use_defaults=False, **params)
         if result['login']['result'] == "Success":
             return True
         elif result['login']['result'] == "NeedToken":
             params['lgtoken'] = result['login']['token']
-            result = self.call(**params)
+            result = self.call(use_defaults=False, **params)
             if result['login']['result'] == "Success":
                 return True
         return False
@@ -254,7 +255,7 @@ class MediaWiki:
 
         :returns: True
         """
-        return self.call(action="logout") == []
+        return self.call(action="logout", use_defaults=False) == []
 
     def set_token(self, *args):
         """
@@ -314,7 +315,7 @@ class MediaWiki:
         params = {"action": "expandtemplates", "title": title, "text": text}
         if includecomments:
             params['includecomments'] = True
-        return self.call(**params)['expandtemplates']["*"]
+        return self.call(use_defaults=False, **params)['expandtemplates']["*"]
 
     def iterator(self, limit=float("inf"), **kwargs):
         """
@@ -379,7 +380,8 @@ class MediaWiki:
     def namespaces(self):
         if self._namespaces is None:
             self._namespaces = {}
-            for ns in self.iterator(meta="siteinfo", siprop="namespaces"):
+            for ns in self.iterator(use_defaults=False,
+                                    meta="siteinfo", siprop="namespaces"):
                 nsid = ns['id']
                 self._namespaces[nsid] = ns["*"]
         return self._namespaces

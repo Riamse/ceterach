@@ -33,7 +33,7 @@ class Category(Page):
         d = {"prop": ('revisions', 'info'), "gcmtitle": self.title,
              "generator": "categorymembers", "rvprop": 'content'
         }
-        res = res or self._api.iterator(**d)
+        res = res or self._api.iterator(use_defaults=False, **d)
         for r in res:
             if r['ns'] == 14:
                 # Subcategories should be retrieved with the subcats property

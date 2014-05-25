@@ -58,7 +58,7 @@ class Revision:
                   "rvprop": rvprop,
                   "rvtoken": "rollback"
         }
-        res = res or list(i(1, **kwargs))[0]
+        res = res or list(i(1, use_defaults=False, **kwargs))[0]
         self._page = self._api.page(res['pageid'])
         res = res['revisions'][0]
         self._summary = res['comment']
