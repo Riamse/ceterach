@@ -22,6 +22,8 @@
 import re
 import functools
 
+from arrow import Arrow
+
 # __all__ and friends are defined at the bottom
 
 #def decorate(attr):
@@ -57,7 +59,7 @@ def addprop(inst, name, method): # http://stackoverflow.com/a/2954373/1133718
 
 def isostrptime(stamp):
     """I'm lazy, and can never remember the format string"""
-    return datetime.datetime.strptime(stamp, "%Y-%m-%dT%H:%M:%SZ")
+    return Arrow.strptime(stamp, "%Y-%m-%dT%H:%M:%SZ")
 
 # Regex to match IPv4 and IPv6 addresses
 # I didn't write this, just google it.
