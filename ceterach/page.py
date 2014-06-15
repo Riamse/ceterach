@@ -414,7 +414,7 @@ class Page:
 
     def undelete(self, reason=""):
         """
-        Unelete the page.
+        Undelete the page.
 
         :type reason: str
         :param reason: The reason for the undeletion.
