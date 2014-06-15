@@ -82,9 +82,13 @@ class MediaWiki:
                      request (default: ``5``). For more information, see
                      `MediaWiki
                      docs <http://www.mediawiki.org/wiki/Manual:Maxlag>`_\.
+                   - *assert*, used according to the (former) MediaWiki
+                     extension (default: ``'user'``). For more information,
+                     refer to `the
+                     docs <https://www.mediawiki.org/wiki/API:Assert>`_\.
 
-        *config* can be a dictionary that only contains those parameters you
-        wish to modify. Passing ``{"throttle": 3.14}``, for example, will
+        *config* can also be a dictionary that only contains those parameters
+        you wish to modify. Passing ``{"throttle": 3.14}``, for example, will
         result in a dictionary with the above parameters, except the throttle
         will be 3.14.
         """
