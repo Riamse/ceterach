@@ -162,18 +162,21 @@ class MediaWiki:
         """
         return Revision(self, identity)
 
-    def call(self, use_defaults=True, **params):
+    def call(self, **params):
         """
         Sends an API query to the wiki, with *params* as query parameters.
         Before the request is sent, the 'format' key of *params* will be set
         to 'json'.
+
+        You can specify the *use_defaults* parameter as False to avoid adding
+        the parameters specified in MediaWiki.config['defaults'].
 
         If everything succeeded, the JSON data will be coerced to a Python
         object and returned.
         """
         time_since_last_query = time() - self.last_query
         conf = self.config
-        if use_defaults:
+        if params.pop("use_defaults", True):
             for (k, v) in conf['defaults'].items():
                 params.setdefault(k, v)
         throttle = conf['throttle']
