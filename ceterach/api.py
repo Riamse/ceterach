@@ -272,10 +272,7 @@ class MediaWiki:
         Sets the Wiki's ``tokens`` attribute with the tokens specified in
         the *args*.
 
-        If *args* are not specified, they will default to ``'delete', 'block',
-        'patrol', 'protect', 'unblock', 'options', 'email', 'edit', 'import',
-        'move', 'watch'``. This
-        method will work only if a user is logged in.
+        If *args* are not specified, they will default to ``'edit'``.
 
         :param args: Strings that represent token names
         """
@@ -384,6 +381,7 @@ class MediaWiki:
 
     @property
     def tokens(self):
+        """A mapping of the token name to the token."""
         return deepcopy(self._tokens)
 
     @property
