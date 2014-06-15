@@ -163,6 +163,9 @@ class MediaWiki:
     def revision(self, identity) -> Revision:
         """
         Returns a Revision object for *identity*, which represents the revid.
+
+        This method does not check if the revid is valid. That will be done
+        when the Revision's attributes are loaded.
         """
         return Revision(self, identity)
 
@@ -385,6 +388,7 @@ class MediaWiki:
 
     @property
     def namespaces(self):
+        """A mapping of the namespace number to the namespace name."""
         if self._namespaces is None:
             self._namespaces = {}
             for ns in self.iterator(use_defaults=False,
