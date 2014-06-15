@@ -365,6 +365,7 @@ class Page:
              redirect=True):
         """
         Move the page to a new title, *target*.
+
         :type target: str
         :param target: Title you want to rename the page to.
         :type reason: str
