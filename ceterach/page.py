@@ -652,10 +652,12 @@ class Page:
     @property
     @decorate
     def categories(self) -> tuple:
+        """A tuple containing the categories that the page can be found in."""
         return "_categories"
 
     @property
     def revisions(self) -> tuple:
+        """A tuple containing the page's revisions, from newest to oldest."""
         return tuple(self._get_revs())
 
     @decorate
