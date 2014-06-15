@@ -77,6 +77,7 @@ class Page:
 
         :returns: {"pageids": ...}, {"titles": ...}, or {"revids": ...}
         """
+        # TODO: Finish the stuff specified in the docstring
         l = (("titles", "title"),  ("pageids", "pageid"), ("revids", "revid"))
         l = ((k, getattr(self, v, None)) for k, v in l)
         for k, v in l:
@@ -157,11 +158,11 @@ class Page:
             else:
                 expiry = isostrptime(expiry)
             self._protection[info['type']] = info['level'], expiry
-        # These last two fields will only be specified if the page exists:
-        self._revisions = ()
+        # These last three fields will only be specified if the page exists:
         try:
             self._revision_user = self._api.user(res['revisions'][0]['user'])
             self._revid = res['lastrevid']
+            self._revisions = []
         except KeyError:
             pass
         c = self._api.category
@@ -455,6 +456,8 @@ class Page:
         return p
 
     def load_revisions(self, num=float("inf")):
+        """Call this to populate self.revisions. Specify the *num* parameter
+        to limit it to *num* revisions, in reverse chronological order."""
         kwargs = {"prop": "revisions",
                   "rvprop": ('ids', 'flags', 'timestamp',
                              'user', 'comment', 'content'),
@@ -470,7 +473,7 @@ class Page:
             filler = {"pageid": self.pageid}
             filler['revisions'] = (r,)
             revision_obj.load_attributes(filler)
-            self._revisions += (revision_obj,)
+            self._revisions.append(revision_obj)
 
     def toggle_talk(self, follow_redirects=None):
         """
@@ -652,6 +655,9 @@ class Page:
         return "_categories"
 
     @property
-    @decorate
     def revisions(self) -> tuple:
+        return tuple(self._get_revs())
+
+    @decorate
+    def _get_revs(self):
         return "_revisions"
