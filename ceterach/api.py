@@ -267,12 +267,12 @@ class MediaWiki:
         :returns: True if the login succeeded, False if not.
         """
         params = {"action": "login", "lgname": username, "lgpassword": password}
-        result = self.call(use_defaults=False, **params)
+        result = self.call(params, use_defaults=False)
         if result['login']['result'] == "Success":
             return True
         elif result['login']['result'] == "NeedToken":
             params['lgtoken'] = result['login']['token']
-            result = self.call(use_defaults=False, **params)
+            result = self.call(params, use_defaults=False)
             if result['login']['result'] == "Success":
                 return True
         return False
@@ -302,12 +302,12 @@ class MediaWiki:
         received = received & allowed
         query = {"action": "tokens", "type": received}
         try:
-            res = self.call(**query)
+            res = self.call(query)
         except exc.CeterachError:
             # The wiki does not support action=tokens
             query = {"prop": "info", "titles": "some random title",
                      "action": "query", "intoken": received}
-            res = self.call(**query)['query']['pages']
+            res = self.call(query)['query']['pages']
             for prop, value in list(res.values())[0].items():
                 if prop.endswith("token"):
                     self._tokens[prop[:-5]] = value
