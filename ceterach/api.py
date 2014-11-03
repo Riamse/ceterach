@@ -169,7 +169,7 @@ class MediaWiki:
         """
         return Revision(self, identity)
 
-    def call(self, params, use_defaults=True, **more_params):
+    def call(self, params=None, use_defaults=True, **more_params):
         """
         Sends an API query to the wiki.
         *params* is a dict representing the query parameters.
@@ -200,6 +200,8 @@ class MediaWiki:
         throttle = conf['throttle']
         if time_since_last_query < throttle:
             sleep(throttle - time_since_last_query)
+        if not params:
+            params = {}
         if use_defaults:
             for (k, v) in conf['defaults'].items():
                 params.setdefault(k, v)
