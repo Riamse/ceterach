@@ -169,26 +169,42 @@ class MediaWiki:
         """
         return Revision(self, identity)
 
-    def call(self, **params):
+    def call(self, params, use_defaults=True, **more_params):
         """
-        Sends an API query to the wiki, with *params* as query parameters.
-        Before the request is sent, the 'format' key of *params* will be set
-        to 'json'.
+        Sends an API query to the wiki.
+        *params* is a dict representing the query parameters.
 
-        You can specify the *use_defaults* parameter as False to avoid adding
-        the parameters specified in MediaWiki.config['defaults'].
+        If *use_defaults* is True, the parameters specified in
+        MediaWiki.config['defaults'] will be added to *params* if they are
+        not already specified.
+
+        If kwargs are specified in *more_params*, they will be used to update
+        *params* before the request is sent.
+
+        If the action is not specified it defaults to 'query'.
+
+        Then, the 'format' key of *params* will be set to 'json'. In a word: ::
+
+            if use_defaults:
+                for k, v in defaults.items():
+                    params.setdefault(k, v)
+            for k, v in more_params.items(): params[k] = v
+            params.setdefault("action", "query")
+            params['format'] = 'json'
 
         If everything succeeded, the JSON data will be coerced to a Python
         object and returned.
         """
         time_since_last_query = time() - self.last_query
         conf = self.config
-        if params.pop("use_defaults", True):
-            for (k, v) in conf['defaults'].items():
-                params.setdefault(k, v)
         throttle = conf['throttle']
         if time_since_last_query < throttle:
             sleep(throttle - time_since_last_query)
+        if use_defaults:
+            for (k, v) in conf['defaults'].items():
+                params.setdefault(k, v)
+        for (k, v) in more_params.items():
+            params[k] = v
         params.setdefault("action", "query")
         params['format'] = 'json'
         for (k, v) in params.items():
