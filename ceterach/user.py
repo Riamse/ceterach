@@ -118,7 +118,7 @@ class User:
         if cc:
             params['ccme'] = True
         try:
-            return self._api.call(**params)
+            return self._api.call(params)
         except exc.CeterachError as e:
             code = e.code
             if code != 'py':

@@ -120,7 +120,7 @@ class Revision:
             params['summary'] = summary
         if bot:
             params['markbot'] = 1
-        return self._api.call(**params)
+        return self._api.call(params)
 
 #    def delete(self):
 #        pass
