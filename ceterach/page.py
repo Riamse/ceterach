@@ -213,7 +213,7 @@ class Page:
         elif edittype == 'create':
             edit_params['createonly'] = edit_params.pop("nocreate")
         try:
-            res = self._api.call(**edit_params)
+            res = self._api.call(edit_params)
         except exc.CeterachError as e:
             # Make the exception more specific
             code = e.code.replace("-anon", "")
@@ -392,7 +392,7 @@ class Page:
                 err = "You do not have the move permission"
                 raise exc.PermissionsError(err)
         #allowed = ("movetalk", "movesubpages", "noredirect", "watch", "unwatch")
-        return self._api.call(**move_params)
+        return self._api.call(move_params)
 
     def delete(self, reason=""):
         """
@@ -466,7 +466,7 @@ class Page:
                   "rvstartid": self.revid,
         }
         kwargs.update(self.identity())
-        res = self._api.call(use_defaults=False, **kwargs)
+        res = self._api.call(kwargs, use_defaults=False)
         revs = tuple(res['query']['pages'].values())[0]['revisions']
         for r in revs:
             revision_obj = Revision(self._api, r['revid'])

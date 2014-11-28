@@ -66,7 +66,7 @@ class MediaWiki:
         - *throttle*, the number of seconds to wait in between
           requests (default: ``0``).
         - *retries*, how many times to retry after an error (default: ``1``).
-          You can use ``float("inf")`` for an indefinite number of times.
+          You can use ``float("inf")`` to keep retrying until it works.
         - *sleep*, the number of seconds to sleep between each retry after an
           error (default: ``5``).
         - *get*, a tuple of which modules can accept GET requests, which
