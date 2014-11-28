@@ -342,7 +342,7 @@ class MediaWiki:
             params['includecomments'] = True
         return self.call(use_defaults=False, **params)['expandtemplates']["*"]
 
-    def iterator(self, limit=float("inf"), **kwargs):
+    def iterator(self, limit=float("inf"), **params):
         """
         Iterates over an API query, so you no longer have to use something like: ::
             >>> res = api.call(action="query", ...)
@@ -364,10 +364,10 @@ class MediaWiki:
             {'ns': 0, 'pageid': 600744, 'title': '!!!'}
 
         """
-        kwargs.pop("action", 0)
+        params.pop("action", 0)
         l = 0
         while True:
-            res = self.call(action='query', **kwargs)
+            res = self.call(action='query', params)
             if isinstance(res['query'], list):
                 return
             res['query'].pop("normalized", 0)
@@ -395,7 +395,7 @@ class MediaWiki:
                         p[p_] = 1  # what is this even doing here
             else:
                 return
-            kwargs.update(c)
+            params.update(c)
 
     @property
     def tokens(self):
