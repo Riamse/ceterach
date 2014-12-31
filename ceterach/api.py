@@ -49,6 +49,7 @@ def_config = {"throttle": 0,
               "defaults": {"maxlag": 5, "assert": "user"},
 }
 
+def_config['defaults']['continue'] = ''  # At some point this became required.
 
 class MediaWiki:
 
@@ -364,10 +365,10 @@ class MediaWiki:
             {'ns': 0, 'pageid': 600744, 'title': '!!!'}
 
         """
-        params.pop("action", 0)
+        params['action'] = 'query'
         l = 0
         while True:
-            res = self.call(action='query', params)
+            res = self.call(params)
             if isinstance(res['query'], list):
                 return
             res['query'].pop("normalized", 0)
