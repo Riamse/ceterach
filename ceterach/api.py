@@ -49,7 +49,7 @@ def_config = {"throttle": 0,
               "defaults": {"maxlag": 5, "assert": "user"},
 }
 
-def_config['defaults']['continue'] = ''  # At some point this became required.
+def_config['defaults']['rawcontinue'] = ''  # At some point this became required.
 
 class MediaWiki:
 
@@ -170,7 +170,7 @@ class MediaWiki:
         """
         return Revision(self, identity)
 
-    def call(self, params=None, use_defaults=True, **more_params):
+    def call(self, params=None, **more_params):
         """
         Sends an API query to the wiki.
         *params* is a dict representing the query parameters.
@@ -203,7 +203,9 @@ class MediaWiki:
             sleep(throttle - time_since_last_query)
         if not params:
             params = {}
-        if use_defaults:
+        if 'use_defaults' in more_params:
+            params['use_defaults'] = more_params['use_defaults']
+        if params.get("use_defaults", True):
             for (k, v) in conf['defaults'].items():
                 params.setdefault(k, v)
         for (k, v) in more_params.items():
@@ -376,7 +378,7 @@ class MediaWiki:
             res['query'].pop("interwiki", 0)
             a_res = res['query'].values()
             if len(a_res) > 1:
-                X = StopIteration # or maybe exc.ApiError?
+                X = StopIteration  # or maybe exc.ApiError?
                 err = "Too many nodes under the query node: {0}"
                 raise X(err.format(", ".join(res['query'].keys())))
             else:
