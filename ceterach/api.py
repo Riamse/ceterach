@@ -240,7 +240,7 @@ class MediaWiki:
                 for _ in itertools.repeat(None, *retries):
                     sleep(conf['sleep'])
                     try:
-                        res = urlopen(self.api_url, params=params)
+                        res = urlopen(self.api_url, **{"params" if is_get else "data": params})
                         ret = res.json()
                     except (requests.HTTPError, requests.ConnectionError) as e:
                         raiseme = exc.ApiError(e)
@@ -349,7 +349,7 @@ class MediaWiki:
         """
         Iterates over an API query, so you no longer have to use something like: ::
             >>> res = api.call(action="query", ...)
-            >>> blah(res["query"]["pages"][tuple(res["query"]["pages"].keys())[0]][...])
+            >>> res["query"]["pages"][tuple(res["query"]["pages"].keys())[0]][...]
 
         :type limit: numbers.Real
         :param limit: The maximum number of items the iterator will yield.
