@@ -39,7 +39,7 @@ class File(Page):
         prop = 'info', 'revisions', 'categories', 'imageinfo'
         rvprop = 'user', 'content'
         iiprop = 'size', 'mime', 'sha1', 'url', 'user'
-        res = res or list(i(1, use_defaults=False,
+        res = res or list(i(use_defaults=False,
                             prop=prop, iiprop=iiprop, rvprop=rvprop,
                             rvlimit=1, rvdir="older", titles=self._title))[0]
         super().load_attributes(res=res)
@@ -56,6 +56,21 @@ class File(Page):
         self._dimensions = imageinfo['width'], imageinfo['height']
 
     def upload(self, fileobj, text, summary, watch=False, key=''):
+        """
+        Upload an arbitrary file object to this file page.
+
+        :type fileobj: file
+        :param fileobj: The file that will be uploaded.
+        :type text: str
+        :param text: The description page for the file page.
+        :type summary: str
+        :param summary: The upload summary to be used.
+        :type watch: bool
+        :param watch: Set this to True in order to put this page on the
+                      watchlist when this file is uploaded, otherwise False.
+        :type key: str
+        :param key: Session key returned by a previous upload that failed due to warnings.
+        """
         contents = fileobj.read()
         post_params = {"filename": self.title, "text": text,
                        "comment": summary, "watch": watch,
@@ -113,7 +128,7 @@ class File(Page):
     @property
     @decorate
     def dimensions(self) -> tuple:
-        """(width, height)"""
+        """A tuple of integers, in the format of ``(width, height)``."""
         return "_dimensions"
 
     @property
