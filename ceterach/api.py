@@ -229,7 +229,7 @@ class MediaWiki:
         if 'error' in ret:
             if ret['error']['code'] == 'maxlag':
                 try:
-                    retries = (int(conf['retries']),)
+                    retries = int(conf['retries']),
                 except OverflowError:
                     retries = ()
                 err = "Maximum number of retries reached ({0})"
@@ -298,7 +298,7 @@ class MediaWiki:
         if not args:
             args = {"edit"}
         received = set(args)
-        received = received & allowed
+        received &= allowed
         query = {"action": "tokens", "type": received}
         try:
             res = self.call(query)
