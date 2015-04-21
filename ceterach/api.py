@@ -95,10 +95,6 @@ class MediaWiki:
         """
         self._tokens = {}
         self._namespaces = None
-        o = urlparse(api_url)
-        if not o.path.endswith("api.php"):
-            raise ValueError("Not an API url")
-        api_url = (o.scheme or "http") + "://" + o.netloc + o.path
         self.api_url = api_url
         self.config = deepcopy(def_config)
         self.config.update(config or {})
