@@ -108,6 +108,18 @@ class Revision:
         return self.page.edit(self.content, summary, minor, bot, force)
 
     def rollback(self, summary="", bot=False):
+        """
+        Undo edits in reverse chronological order, and stop when the edit
+        about to be undone is made by a user different from the one who had
+        most recently edited the page.
+
+        :type summary: str
+        :param summary: The edit summary to revert the edits.
+        :type bot: bool
+        :param bot: If set to true, mark the edit as a bot edit, if the user
+                    has the bot flag.
+        :returns: A dictionary containing the API query result.
+        """
         params = {"title": self.page._api, "user": self.user.name,
                   "token": self.rvtoken, "action": "rollback"
         }
@@ -131,6 +143,7 @@ class Revision:
     @property
     @decorate
     def revid(self) -> int:
+        "Return the revision id of the revision."
         return "_revid"
 
     @property
@@ -141,6 +154,7 @@ class Revision:
     @property
     @decorate
     def page(self):
+        "Return the page that this revision was made to."
         #: :type: ceterach.page.Page
         attr = "_page"
         return attr
@@ -148,16 +162,19 @@ class Revision:
     @property
     @decorate
     def summary(self) -> str:
+        "Return the edit summary that describes this revision."
         return "_summary"
 
     @property
     @decorate
     def timestamp(self)-> datetime.datetime:
+        "Return the timestamp at which this revision was made."
         return "_timestamp"
 
     @property
     @decorate
     def user(self):
+        "Return the user who made this revision."
         #: :type: ceterach.user.User
         attr = "_user"
         return attr
@@ -165,11 +182,13 @@ class Revision:
     @property
     @decorate
     def is_minor(self) -> bool:
+        "Return True if this revision was a minor edit, otherwise False."
         return "_is_minor"
 
     @property
     @decorate
     def prev_revision(self):
+        "Return the revision made before this one, which was made to the same page."
         #: :type: ceterach.revision.Revision
         attr = "_prev_revision"
         return attr
@@ -177,9 +196,11 @@ class Revision:
     @property
     @decorate
     def content(self) -> str:
+        "Return the content of the page described by this revision."
         return "_content"
 
     @property
     @decorate
     def is_deleted(self) -> bool:
+        "Return True if the revision is deleted, otherwise False."
         return "_is_deleted"
