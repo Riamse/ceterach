@@ -87,7 +87,15 @@ class File(Page):
         return res
 
     def url(self, width=None, height=None) -> str:
-        """A direct link to the file"""
+        """Returns a direct link to the file.
+
+        You may specify either the width or the height, but not both.
+
+        :type width: int
+        :param width: The desired width of the image.
+        :type height: int
+        :param height: The desired height of the image.
+        """
         if not self.exists:
             err = "File {0!r} does not exist"
             raise exc.NonexistentPageError(err.format(self.title))
@@ -95,7 +103,8 @@ class File(Page):
             raise TypeError("Cannot specify both width and height")
         t = quote(self.title.replace(" ", "_"), safe=":/")[5:]
         url = self._url
-        url = re.sub(r"(/[a-z0-9]/[a-z0-9]{2}/)", r"/thumb\1", url[::-1].replace('/' + t[::-1], '')[::-1])
+        url = re.sub(r"(/[a-z0-9]/[a-z0-9]{2}/)",
+                     r"/thumb\1", url[::-1].replace('/' + t[::-1], '')[::-1])
         if width:
             url += "/" + str(width) + "px-" + t
         elif height:
@@ -103,7 +112,7 @@ class File(Page):
             # -------    =     -------------
             # height           param(height)
             d = self.dimensions
-            width = round(d[0] * height / d[1])
+            width = int(d[0] * height / d[1] + 0.5)
             url += "/" + str(width) + "px-" + t
         return url
 
