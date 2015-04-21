@@ -143,7 +143,7 @@ class Revision:
     @property
     @decorate
     def revid(self) -> int:
-        "Return the revision id of the revision."
+        "The revision id of the revision."
         return "_revid"
 
     @property
@@ -154,7 +154,7 @@ class Revision:
     @property
     @decorate
     def page(self):
-        "Return the page that this revision was made to."
+        "The page to which this revision was made."
         #: :type: ceterach.page.Page
         attr = "_page"
         return attr
@@ -162,19 +162,19 @@ class Revision:
     @property
     @decorate
     def summary(self) -> str:
-        "Return the edit summary that describes this revision."
+        "The edit summary that describes this revision."
         return "_summary"
 
     @property
     @decorate
     def timestamp(self)-> datetime.datetime:
-        "Return the timestamp at which this revision was made."
+        "The time at which this revision was made."
         return "_timestamp"
 
     @property
     @decorate
     def user(self):
-        "Return the user who made this revision."
+        "The user who made this revision."
         #: :type: ceterach.user.User
         attr = "_user"
         return attr
@@ -182,13 +182,13 @@ class Revision:
     @property
     @decorate
     def is_minor(self) -> bool:
-        "Return True if this revision was a minor edit, otherwise False."
+        "True if this revision was a minor edit, otherwise False."
         return "_is_minor"
 
     @property
     @decorate
     def prev_revision(self):
-        "Return the revision made before this one, which was made to the same page."
+        "The revision made before this one, which was made to the same page."
         #: :type: ceterach.revision.Revision
         attr = "_prev_revision"
         return attr
@@ -196,11 +196,11 @@ class Revision:
     @property
     @decorate
     def content(self) -> str:
-        "Return the content of the page described by this revision."
+        "The content of the page described by this revision."
         return "_content"
 
     @property
     @decorate
     def is_deleted(self) -> bool:
-        "Return True if the revision is deleted, otherwise False."
+        "True if the revision is deleted, otherwise False."
         return "_is_deleted"
