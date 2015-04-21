@@ -315,7 +315,7 @@ class MediaWiki:
             for token_name, token_value in res['tokens'].items():
                 self._tokens[token_name[:-5]] = token_value
 
-    def expandtemplates(self, title, text, includecomments=False):
+    def expandtemplates(self, title, text, include_comments=False):
         """
         Evaluate the templates in *text* and return the processed result.
 
@@ -375,8 +375,8 @@ class MediaWiki:
             a_res = res['query'].values()
             if len(a_res) > 1:
                 X = StopIteration  # or maybe exc.ApiError?
-                err = "Too many nodes under the query node: {0}"
-                raise X(err.format(", ".join(res['query'].keys())))
+                err = "Too many nodes under the query node: "
+                raise X(err + ", ".join(res['query'].keys()))
             else:
                 ret = list(a_res)[0]
                 if isinstance(ret, dict):
