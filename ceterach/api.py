@@ -337,7 +337,7 @@ class MediaWiki:
         :returns: Text with templates expanded.
         """
         params = {"action": "expandtemplates", "title": title, "text": text}
-        if includecomments:
+        if include_comments:
             params['includecomments'] = True
         return self.call(use_defaults=False, **params)['expandtemplates']["*"]
 
