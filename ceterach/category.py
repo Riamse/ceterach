@@ -23,10 +23,27 @@ class Category(Page):
 
     def load_attributes(self, res=None):
         super().load_attributes(res)
-        self._members = ()
-        self._subcats = ()
+        self._members = []
+        self._subcats = []
 
     def populate(self, res=None):
+        """
+        Get the pages that are contained by this category, and subcategories.
+        This data is stored in ``._members`` and ``._subcats``.
+
+        If the *res* parameter was supplied, the method will pretend that
+        was what the query returned.
+
+        :type res: list
+        :param res: The result of an earlier API request (optional). If you
+                    are planning to set this parameter to a value
+                    other than None, the minimal API request parameters to
+                    correctly form this are: ``{"prop": ('revisions', 'info'),
+                    "gcmtitle": category_title,
+                    "generator": "categorymembers",
+                    "rvprop": 'content'}``
+
+        """
         # Empty the members and subcats so we don't have duplicates
         self._members = []
         self._subcats = []
