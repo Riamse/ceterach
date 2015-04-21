@@ -341,7 +341,7 @@ class MediaWiki:
             params['includecomments'] = True
         return self.call(use_defaults=False, **params)['expandtemplates']["*"]
 
-    def iterator(self, limit=float("inf"), **params):
+    def iterator(self, params=None, limit=float("inf"), **more_params):
         """
         Iterates over an API query, so you no longer have to use something like: ::
             >>> res = api.call(action="query", ...)
@@ -363,7 +363,10 @@ class MediaWiki:
             {'ns': 0, 'pageid': 600744, 'title': '!!!'}
 
         """
-        params['action'] = 'query'
+        if not params:
+            params = {"action": "query"}
+        for k, v in more_params.items():
+            params[k] = v
         l = 0
         while True:
             res = self.call(params)
