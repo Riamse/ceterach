@@ -28,8 +28,8 @@ class Category(Page):
 
     def populate(self, res=None):
         # Empty the members and subcats so we don't have duplicates
-        self._members = ()
-        self._subcats = ()
+        self._members = []
+        self._subcats = []
         d = {"prop": ('revisions', 'info'), "gcmtitle": self.title,
              "generator": "categorymembers", "rvprop": 'content'
         }
@@ -38,12 +38,12 @@ class Category(Page):
             if r['ns'] == 14:
                 # Subcategories should be retrieved with the subcats property
                 p = self._api.category(r['title'])
-                self._subcats += (p,)
+                self._subcats.append(p)
             else:
                 p = self._api.page(r['title'])
                 p._content = r['revisions'][0]["*"]
                 p.load_attributes(r)
-                self._members += (p,)
+                self._members.append(p)
 
     @property
     def members(self):
