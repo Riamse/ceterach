@@ -315,7 +315,7 @@ class MediaWiki:
             for token_name, token_value in res['tokens'].items():
                 self._tokens[token_name[:-5]] = token_value
 
-    def expandtemplates(self, title, text, include_comments=False):
+    def expand_templates(self, title, text, include_comments=False):
         """
         Evaluate the templates in *text* and return the processed result.
 
