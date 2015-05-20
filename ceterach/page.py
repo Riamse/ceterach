@@ -127,7 +127,7 @@ class Page:
             kwargs['pageids'] = self.pageid
         else:
             raise exc.CeterachError("WTF")
-        res = res or next(i(1, use_defaults=False, **kwargs))
+        res = res or next(i(limit=1, use_defaults=False, **kwargs))
         # Normalise the page title in case it was entered oddly
         self._title = res['title']
         self._is_redirect = 'redirect' in res
@@ -144,7 +144,8 @@ class Page:
                 raise exc.InvalidPageError(err.format(self.title))
         else:
             self._exists = True
-            self._content = res['revisions'][0]["*"]
+            if "*" in res.get('revisions', {0: ()})[0]:
+                self._content = res['revisions'][0]["*"]
         self._namespace = res["ns"]
         self._is_talkpage = self._namespace % 2 == 1 # talkpages have odd IDs
         self._protection = {"edit": (None, None),
