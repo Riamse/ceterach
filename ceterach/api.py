@@ -204,14 +204,12 @@ class MediaWiki:
             sleep(throttle - time_since_last_query)
         if not params:
             params = {}
-        if 'use_defaults' in more_params:
-            params['use_defaults'] = more_params['use_defaults']
-        if params.get("use_defaults", True):
+        if params.setdefault("use_defaults", more_params.get("use_defaults", True)):
             for (k, v) in conf['defaults'].items():
                 params.setdefault(k, v)
         for (k, v) in more_params.items():
             params[k] = v
-        params.pop("use_defaults", None)
+        del params["use_defaults"]
         params.setdefault("action", "query")
         params['format'] = 'json'
         for (k, v) in params.items():
