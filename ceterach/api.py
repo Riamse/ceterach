@@ -378,7 +378,7 @@ class MediaWiki:
                 params.setdefault(k, v)
 
         if params.setdefault('use_iterdefaults', more_params.get("use_iterdefaults", True)):
-            for (k, v) in conf['iterdefaults']:
+            for (k, v) in conf['iterdefaults'].items():
                 params.setdefault(k, v)
 
         for (k, v) in more_params.items():
