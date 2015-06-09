@@ -47,6 +47,7 @@ def_config = {"throttle": 0,
               "sleep": 5,
               "get": ('query', 'purge'),
               "defaults": {"maxlag": 5, "assert": "user"},
+              "iterdefaults": {"rawcontinue": ""}
 }
 
 def_config['defaults']['rawcontinue'] = ''  # At some point this became required.
@@ -87,6 +88,10 @@ class MediaWiki:
                      extension (default: ``'user'``). For more information,
                      refer to `the
                      docs <https://www.mediawiki.org/wiki/API:Assert>`_\.
+
+        - *iterdefaults* is a dict that functions similarly to *defaults*, but
+          only applies to the .iterate() method (default:
+          ``{"rawcontinue": ""}``).
 
         *config* can also be a dictionary that only contains those parameters
         you wish to modify. Passing ``{"throttle": 3.14}``, for example, will
@@ -364,13 +369,14 @@ class MediaWiki:
             {'ns': 0, 'pageid': 600744, 'title': '!!!'}
 
         """
+
         if not params:
             params = {"action": "query"}
         for k, v in more_params.items():
             params[k] = v
         l = 0
         while True:
-            res = self.call(params)
+            res = self.call(params, use_defaults=False)
             #print("QUERY")
             if isinstance(res['query'], list):
                 return
