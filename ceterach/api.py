@@ -211,7 +211,7 @@ class MediaWiki:
                 params.setdefault(k, v)
         for (k, v) in more_params.items():
             params[k] = v
-        params.pop("usedefaults", None)
+        params.pop("use_defaults", None)
         params.setdefault("action", "query")
         params['format'] = 'json'
         for (k, v) in params.items():
