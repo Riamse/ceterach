@@ -373,15 +373,11 @@ class MediaWiki:
         if not params:
             params = {"action": "query"}
 
-        if 'use_defaults' in more_params:
-            params['use_defaults'] = more_params['use_defaults']
-        if params.setdefault("use_defaults", True):
+        if params.setdefault("use_defaults", more_params.get("use_defaults", True)):
             for (k, v) in conf['defaults'].items():
                 params.setdefault(k, v)
 
-        if 'use_iterdefaults' in more_params:
-            params['use_iterdefaults'] = more_params['use_iterdefaults']
-        if params.setdefault('use_iterdefaults', True):
+        if params.setdefault('use_iterdefaults', more_params.get("use_iterdefaults", True)):
             for (k, v) in conf['iterdefaults']:
                 params.setdefault(k, v)
 
