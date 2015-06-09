@@ -369,11 +369,29 @@ class MediaWiki:
             {'ns': 0, 'pageid': 600744, 'title': '!!!'}
 
         """
-
+        # do the use_defaults stuff here and take it out before passing it
+        # to .call()
+        conf = self.config
         if not params:
             params = {"action": "query"}
-        for k, v in more_params.items():
+
+        if 'use_defaults' in more_params:
+            params['use_defaults'] = more_params['use_defaults']
+        if params.setdefault("use_defaults", True):
+            for (k, v) in conf['defaults'].items():
+                params.setdefault(k, v)
+
+        if 'use_iterdefaults' in more_params:
+            params['use_iterdefaults'] = more_params['use_iterdefaults']
+        if params.setdefault('use_iterdefaults', True):
+            for (k, v) in conf['iterdefaults']:
+                params.setdefault(k, v)
+
+        for (k, v) in more_params.items():
             params[k] = v
+
+        del params['use_defaults']
+        del params['use_iterdefaults']
         l = 0
         while True:
             res = self.call(params, use_defaults=False)
