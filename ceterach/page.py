@@ -194,7 +194,7 @@ class Page:
             edit_params['bot'] = 1
         if force is False:
             detect_ec = dict(prop="revisions", rvprop="timestamp", **ident_s)
-            ec_timestamp_res = next(self._api.iterator(1, **detect_ec))
+            ec_timestamp_res = next(self._api.iterator(limit=1, **detect_ec))
             if 'missing' in ec_timestamp_res and edittype != 'create':
                 err = "Use the 'create' method to create pages"
                 raise exc.NonexistentPageError(err)
