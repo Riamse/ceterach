@@ -420,6 +420,158 @@ class MediaWiki:
                 return
             params.update(c)
 
+    def olditerator(self, params=None, limit=float("inf"), **more_params):
+        """
+        Iterates over an API query, so you no longer have to use something like: ::
+            >>> res = api.call(action="query", ...)
+            >>> res["query"]["pages"][tuple(res["query"]["pages"].keys())[0]][...]
+
+        :type params: dict
+        :param params: Parameters to the query.
+        :type limit: numbers.Real
+        :param limit: The maximum number of items the iterator will yield.
+                      Defaults to infinity.
+        :param more_params: Parameters to the query, which will be added to
+                            *params*. See .call() for similar behaviour.
+
+        :returns: A generator that probably contains dicts.
+
+        Example usage: ::
+
+            >>> for s in api.iterator(list="allpages", apnamespace=0, aplimit=1, limit=3):
+            ...     print(s)
+            ...
+            {'ns': 0, 'pageid': 5878274, 'title': '!'}
+            {'ns': 0, 'pageid': 3632887, 'title': '!!'}
+            {'ns': 0, 'pageid': 600744, 'title': '!!!'}
+
+        """
+        # do the use_defaults stuff here and take it out before passing it
+        # to .call()
+        conf = self.config
+        if not params:
+            params = {"action": "query"}
+
+        if params.setdefault("use_defaults", more_params.get("use_defaults", True)):
+            for (k, v) in conf['defaults'].items():
+                params.setdefault(k, v)
+
+        if params.setdefault('use_iterdefaults', more_params.get("use_iterdefaults", True)):
+            for (k, v) in conf['iterdefaults'].items():
+                params.setdefault(k, v)
+
+        for (k, v) in more_params.items():
+            params[k] = v
+
+        del params['use_defaults']
+        del params['use_iterdefaults']
+        l = 0
+        while True:
+            res = self.call(params, use_defaults=False)
+            #print("QUERY")
+            if isinstance(res['query'], list):
+                return
+            res['query'].pop("normalized", 0)
+            res['query'].pop("redirects", 0)
+            res['query'].pop("interwiki", 0)
+            a_res = res['query'].values()
+            if len(a_res) > 1:
+                X = StopIteration  # or maybe exc.ApiError?
+                err = "Too many nodes under the query node: "
+                raise X(err + ", ".join(res['query'].keys()))
+            else:
+                ret = list(a_res)[0]
+                if isinstance(ret, dict):
+                    ret = list(ret.values())
+            for r in ret:
+                yield r
+                l += 1
+                if l >= limit:
+                    return
+            if 'query-continue' in res:
+                c, p = {}, {}
+                for p_, n in res['query-continue'].items():
+                    for k, v in n.items():
+                        c[k] = v
+                        p[p_] = 1  # what is this even doing here
+            else:
+                return
+            params.update(c)
+
+    def newiterator(self, params=None, limit=float("inf"), **more_params):
+        """
+        Iterates over an API query, so you no longer have to use something like: ::
+            >>> res = api.call(action="query", ...)
+            >>> res["query"]["pages"][tuple(res["query"]["pages"].keys())[0]][...]
+
+        :type params: dict
+        :param params: Parameters to the query.
+        :type limit: numbers.Real
+        :param limit: The maximum number of items the iterator will yield.
+                      Defaults to infinity.
+        :param more_params: Parameters to the query, which will be added to
+                            *params*. See .call() for similar behaviour.
+
+        :returns: A generator that probably contains dicts.
+
+        Example usage: ::
+
+            >>> for s in api.iterator(list="allpages", apnamespace=0, aplimit=1, limit=3):
+            ...     print(s)
+            ...
+            {'ns': 0, 'pageid': 5878274, 'title': '!'}
+            {'ns': 0, 'pageid': 3632887, 'title': '!!'}
+            {'ns': 0, 'pageid': 600744, 'title': '!!!'}
+
+        """
+        # do the use_defaults stuff here and take it out before passing it
+        # to .call()
+        conf = self.config
+        if not params:
+            params = {"action": "query"}
+
+        if params.setdefault("use_defaults", more_params.get("use_defaults", True)):
+            for (k, v) in conf['defaults'].items():
+                params.setdefault(k, v)
+
+        if params.setdefault('use_iterdefaults', more_params.get("use_iterdefaults", True)):
+            for (k, v) in conf['iterdefaults'].items():
+                params.setdefault(k, v)
+
+        for (k, v) in more_params.items():
+            params[k] = v
+
+        del params['use_defaults']
+        del params['use_iterdefaults']
+        l = 0
+        while True:
+            res = self.call(params, use_defaults=False)
+            #print("QUERY")
+            if isinstance(res['query'], list):
+                return
+            res['query'].pop("normalized", 0)
+            res['query'].pop("redirects", 0)
+            res['query'].pop("interwiki", 0)
+            a_res = res['query'].values()
+            if len(a_res) > 1:
+                X = StopIteration  # or maybe exc.ApiError?
+                err = "Too many nodes under the query node: "
+                raise X(err + ", ".join(res['query'].keys()))
+            else:
+                ret = list(a_res)[0]
+                if isinstance(ret, dict):
+                    ret = list(ret.values())
+            for r in ret:
+                yield r
+                l += 1
+                if l >= limit:
+                    return
+            if 'continue' in res:
+                c = res['continue']  # easy stuff now
+            else:
+                return
+            params.update(c)
+
     @property
     def tokens(self):
         """A mapping of the token name to the token."""
