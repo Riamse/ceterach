@@ -50,7 +50,7 @@ def_config = {"throttle": 0,
               "iterdefaults": {"rawcontinue": ""}
 }
 
-def_config['defaults']['rawcontinue'] = ''  # At some point this became required.
+#def_config['defaults']['rawcontinue'] = ''  # At some point this became required.
 
 class MediaWiki:
 
@@ -297,12 +297,9 @@ class MediaWiki:
 
         :param args: Strings that represent token names
         """
-        allowed = set("block delete edit email import move "
-                      "options patrol protect unblock watch".split())
         if not args:
             args = {"edit"}
         received = set(args)
-        received &= allowed
         query = {"action": "tokens", "type": received}
         try:
             res = self.call(query)
@@ -418,6 +415,7 @@ class MediaWiki:
             else:
                 return
             params.update(c)
+            #print(res)
 
     @property
     def tokens(self):
