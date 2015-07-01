@@ -90,7 +90,7 @@ class MediaWiki:
                      docs <https://www.mediawiki.org/wiki/API:Assert>`_\.
 
         - *iterdefaults* is a dict that functions similarly to *defaults*, but
-          only applies to the .iterate() method (default:
+          only applies to the .iterator() method (default:
           ``{"rawcontinue": ""}``).
 
         *config* can also be a dictionary that only contains those parameters
