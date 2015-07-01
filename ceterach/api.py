@@ -54,10 +54,10 @@ def_config = {"throttle": 0,
 
 class MediaWiki:
 
-#    def __init__(self, api_url="http://en.wikipedia.org/w/api.php", config=None):
+    def __init__(self, api_url="http://en.wikipedia.org/w/api.php", config=None):
 #    def __init__(self, api_url="http://wiki.ciit.zp.ua/api.php", config=None): # 1.16
 #    def __init__(self, api_url="http://wiki.mako.cc/api.php", config=None): # 1.19
-    def __init__(self, api_url="http://test.wikipedia.org/w/api.php", config=None): # newest
+#    def __init__(self, api_url="http://test.wikipedia.org/w/api.php", config=None): # newest
     # def __init__(self, api_url="http://localhost:8080/srv/mediawiki/api.php", config=None): # 1.20
         """
         *api_url* is the full url to the wiki's API (default:
@@ -200,7 +200,7 @@ class MediaWiki:
         time_since_last_query = time() - self.last_query
         conf = self.config
         throttle = conf['throttle']
-        if time_since_last_query < throttle:
+        if throttle and time_since_last_query < throttle:
             sleep(throttle - time_since_last_query)
         if not params:
             params = {}
@@ -348,9 +348,13 @@ class MediaWiki:
             >>> res = api.call(action="query", ...)
             >>> res["query"]["pages"][tuple(res["query"]["pages"].keys())[0]][...]
 
+        :type params: dict
+        :param params: Parameters to the query.
         :type limit: numbers.Real
         :param limit: The maximum number of items the iterator will yield.
                       Defaults to infinity.
+        :param more_params: Parameters to the query, which will be added to
+                            *params*. See .call() for similar behaviour.
 
         :returns: A generator that probably contains dicts.
 
@@ -415,7 +419,6 @@ class MediaWiki:
             else:
                 return
             params.update(c)
-            #print(res)
 
     @property
     def tokens(self):
