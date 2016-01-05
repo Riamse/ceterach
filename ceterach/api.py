@@ -204,6 +204,7 @@ class MediaWiki:
             sleep(throttle - time_since_last_query)
         if not params:
             params = {}
+        params = params.copy()
         if params.setdefault("use_defaults", more_params.get("use_defaults", True)):
             for (k, v) in conf['defaults'].items():
                 params.setdefault(k, v)
