@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-#-------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------
 # This file is part of Ceterach.
 # Copyright (C) 2013 Riamse <riamse@protonmail.com>
 #
@@ -15,7 +15,7 @@
 #
 # You should have received a copy of the GNU Lesser General Public License
 # along with Ceterach.  If not, see <http://www.gnu.org/licenses/>.
-#-------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------
 
 
 class CeterachError(Exception):

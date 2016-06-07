@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-#-------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # This file is part of Ceterach.
 # Copyright (C) 2013 Riamse <riamse@protonmail.com>
 #
@@ -15,7 +15,7 @@
 #
 # You should have received a copy of the GNU Lesser General Public License
 # along with Ceterach.  If not, see <http://www.gnu.org/licenses/>.
-#-------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 
 from urllib.parse import quote
 import re
@@ -39,9 +39,9 @@ class File(Page):
         prop = 'info', 'revisions', 'categories', 'imageinfo'
         rvprop = 'user', 'content'
         iiprop = 'size', 'mime', 'sha1', 'url', 'user'
-        res = res or list(i(use_defaults=False,
+        res = res or next(i(use_defaults=False,
                             prop=prop, iiprop=iiprop, rvprop=rvprop,
-                            rvlimit=1, rvdir="older", titles=self._title))[0]
+                            rvlimit=1, rvdir="older", titles=self._title))
         super().load_attributes(res=res)
         try:
             imageinfo = res['imageinfo'][0]
@@ -56,8 +56,7 @@ class File(Page):
         self._dimensions = imageinfo['width'], imageinfo['height']
 
     def upload(self, fileobj, text, summary, watch=False, key=''):
-        """
-        Upload an arbitrary file object to this file page.
+        """Upload an arbitrary file object to this file page.
 
         :type fileobj: file
         :param fileobj: The file that will be uploaded.
@@ -72,14 +71,18 @@ class File(Page):
         :param key: Session key returned by a previous upload that failed due to warnings.
         """
         contents = fileobj.read()
-        post_params = {"filename": self.title, "text": text,
-                       "comment": summary, "watch": watch,
-                       "ignorewarnings": True, "file": contents,
-                       "token": self._api.tokens['edit']
+        post_params = {
+            "filename": self.title,
+            "text": text,
+            "comment": summary,
+            "watch": watch,
+            "ignorewarnings": True,
+            "file": contents,
+            "token": self._api.tokens['edit']
         }
         if key:
             post_params['sessionkey'] = key
-        res = self._api.call(**post_params)
+        res = self._api.call(post_params)
         if 'upload' in res and res['upload']['result'] == "Success":
             # Some attributes are now out of date
             del self._dimensions, self._uploader, self._hash
@@ -119,19 +122,19 @@ class File(Page):
     @property
     @decorate
     def mime(self) -> str:
-        """The mime type of the file"""
+        """The mime type of the file."""
         return "_mime"
 
     @property
     @decorate
     def hash(self) -> str:
-        """The SHA1 hash of the file content"""
+        """The SHA1 hash of the file content."""
         return "_hash"
 
     @property
     @decorate
     def size(self) -> int:
-        """The file size in bytes"""
+        """The file size in bytes."""
         return "_size"
 
     @property

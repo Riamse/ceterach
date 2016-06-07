@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-#-------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # This file is part of Ceterach.
 # Copyright (C) 2013 Riamse <riamse@protonmail.com>
 #
@@ -15,7 +15,7 @@
 #
 # You should have received a copy of the GNU Lesser General Public License
 # along with Ceterach.  If not, see <http://www.gnu.org/licenses/>.
-#-------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 
 from .page import Page
 
@@ -27,9 +27,8 @@ class Category(Page):
         self._subcats = []
 
     def populate(self, res=None):
-        """
-        Get the pages that are contained by this category, and subcategories.
-        This data is stored in ``._members`` and ``._subcats``.
+        """Get the pages that are contained by this category, and
+        subcategories. This data is stored in ``._members`` and ``._subcats``.
 
         If the *res* parameter was supplied, the method will pretend that
         was what the query returned.
@@ -47,10 +46,13 @@ class Category(Page):
         # Empty the members and subcats so we don't have duplicates
         self._members = []
         self._subcats = []
-        d = {"prop": ('revisions', 'info'), "gcmtitle": self.title,
-             "generator": "categorymembers", "rvprop": 'content'
+        d = {
+            "prop": ('revisions', 'info'),
+            "gcmtitle": self.title,
+            "generator": "categorymembers",
+            "rvprop": 'content'
         }
-        res = res or self._api.iterator(use_defaults=False, **d)
+        res = res or self._api.iterator(d, use_defaults=False)
         for r in res:
             if r['ns'] == 14:
                 # Subcategories should be retrieved with the subcats property
@@ -64,18 +66,14 @@ class Category(Page):
 
     @property
     def members(self):
-        """
-        Iterate over Pages in the category.
-        """
+        """Iterate over Pages in the category."""
         if not hasattr(self, "_members"):
             self.populate()
         return self._members
 
     @property
     def subcats(self):
-        """
-        Iterate over Categories in the category.
-        """
+        """Iterate over Categories in the category."""
         if not hasattr(self, "_subcats"):
             self.populate()
         return self._subcats
