@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-#-------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # This file is part of Ceterach.
 # Copyright (C) 2013 Andrew Wang <andrewwang43@gmail.com>
 #
@@ -15,7 +15,7 @@
 #
 # You should have received a copy of the GNU Lesser General Public License
 # along with Ceterach.  If not, see <http://www.gnu.org/licenses/>.
-#-------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 
 import re
 from hashlib import md5
@@ -37,8 +37,7 @@ def decorate(meth):
 
 
 class Page:
-    """
-    This represents a page on a wiki, and has attributes that ease the process
+    """This represents a page on a wiki, and has attributes that ease the process
     of getting information about the page.
     """
 
@@ -69,13 +68,13 @@ class Page:
                (getattr(other, 'title', None) == self.title or getattr(other, 'pageid', None) == self.pageid)
 
     def identity(self):
-        """
-        Return a {key: value} that can be used in API queries.
+        """Return a ``{key: value}`` that can be used in API queries.
 
         It should probably return None or raise an exception if nothing useful
         could be found. One day, it will.
 
-        :returns: {"pageids": ...}, {"titles": ...}, or {"revids": ...}
+        :returns: ``{"pageids": ...}``, ``{"titles": ...}``, or
+                  ``{"revids": ...}``
         """
         # TODO: Finish the stuff specified in the docstring
         l = (("titles", "title"),  ("pageids", "pageid"), ("revids", "revid"))
@@ -83,10 +82,8 @@ class Page:
         for k, v in l:
             if v: return {k: v}
 
-
     def load_attributes(self, res=None):
-        """
-        Call this to load ``self.__title``, ``._is_redirect``, ``._pageid``,
+        """Call this to load ``self.__title``, ``._is_redirect``, ``._pageid``,
         ``._exists``, ``._namespace``, ``._creator``, and ``._revid``.
 
         This method also resolves redirects if ``follow_redirects=True`` was
@@ -118,8 +115,9 @@ class Page:
         prop = ('info', 'revisions', 'categories')
         inprop = ("protection",)
         rvprop = ('ids', 'flags', 'timestamp', 'user', 'comment', 'content')
-        kwargs = {"prop": prop, "rvprop": rvprop, "inprop": inprop,
-                  "rvlimit": 1, "rvdir": "older"
+        kwargs = {
+            "prop": prop, "rvprop": rvprop, "inprop": inprop,
+            "rvlimit": 1, "rvdir": "older"
         }
         if self.title != '':
             kwargs['titles'] = self.title
@@ -127,7 +125,7 @@ class Page:
             kwargs['pageids'] = self.pageid
         else:
             raise exc.CeterachError("WTF")
-        res = res or next(i(limit=1, use_defaults=False, **kwargs))
+        res = res or next(i(kwargs, use_defaults=False))
         # Normalise the page title in case it was entered oddly
         self._title = res['title']
         self._is_redirect = 'redirect' in res
@@ -147,10 +145,11 @@ class Page:
             if "*" in res.get('revisions', {0: ()})[0]:
                 self._content = res['revisions'][0]["*"]
         self._namespace = res["ns"]
-        self._is_talkpage = self._namespace % 2 == 1 # talkpages have odd IDs
-        self._protection = {"edit": (None, None),
-                            "move": (None, None),
-                            "create": (None, None),
+        self._is_talkpage = self._namespace % 2 == 1  # talkpages have odd IDs
+        self._protection = {
+            "edit": (None, None),
+            "move": (None, None),
+            "create": (None, None),
         }
         for info in res.get("protection", ''):
             expiry = info['expiry']
@@ -181,8 +180,9 @@ class Page:
             if token is None:
                 err = "You do not have the edit permission"
                 raise exc.PermissionsError(err)
-        edit_params = dict(action="edit", text=content, token=token,
-                           summary=summary, **ident
+        edit_params = dict(
+            action="edit", text=content, token=token,
+            summary=summary, **ident
         )
         # Apparently English Wikipedia doesn't recognise this anymore
         #edit_params['notbot'] = 1
@@ -194,7 +194,7 @@ class Page:
             edit_params['bot'] = 1
         if force is False:
             detect_ec = dict(prop="revisions", rvprop="timestamp", **ident_s)
-            ec_timestamp_res = next(self._api.iterator(limit=1, **detect_ec))
+            ec_timestamp_res = next(self._api.iterator(detect_ec))
             if 'missing' in ec_timestamp_res and edittype != 'create':
                 err = "Use the 'create' method to create pages"
                 raise exc.NonexistentPageError(err)
@@ -253,8 +253,7 @@ class Page:
         return res
 
     def edit(self, content, summary="", minor=False, bot=False, force=False):
-        """
-        Replace the page's content with *content*. *summary* is the edit
+        """Replace the page's content with *content*. *summary* is the edit
         summary used for the edit. The edit will be marked as minor if *minor*
         is True, and if *bot* is True and the logged-in user has the bot flag,
         it will also be marked as a bot edit.
@@ -281,8 +280,7 @@ class Page:
         return self.__edit(content, summary, minor, bot, force, 'standard')
 
     def create(self, content, summary="", minor=False, bot=False, force=False):
-        """
-        Create the page with *content* as the content. *summary* is the edit
+        """Create the page with *content* as the content. *summary* is the edit
         summary used for the edit. The edit will be marked as minor if *minor*
         is True, and if *bot* is True and the logged-in user has the bot flag,
         it will also be marked as a bot edit.
@@ -308,8 +306,7 @@ class Page:
         return self.__edit(content, summary, minor, bot, force, 'create')
 
     def append(self, content, summary="", minor=False, bot=False, force=False):
-        """
-        Add *content* to the bottom of the page. *summary* is the edit
+        """Add *content* to the bottom of the page. *summary* is the edit
         summary used for the edit. The edit will be marked as minor if *minor*
         is True, and if *bot* is True and the logged-in user has the bot flag,
         it will also be marked as a bot edit.
@@ -336,8 +333,7 @@ class Page:
         return self.__edit(content, summary, minor, bot, force, 'append')
 
     def prepend(self, content, summary="", minor=False, bot=False, force=False):
-        """
-        Add *content* to the top of the page. *summary* is the edit
+        """Add *content* to the top of the page. *summary* is the edit
         summary used for the edit. The edit will be marked as minor if *minor*
         is True, and if *bot* is True and the logged-in user has the bot flag,
         it will also be marked as a bot edit.
@@ -365,8 +361,7 @@ class Page:
 
     def move(self, target, reason, talk=False, subpages=False,
              redirect=True):
-        """
-        Move the page to a new title, *target*.
+        """Move the page to a new title, *target*.
 
         :type target: str
         :param target: Title you want to rename the page to.
@@ -380,10 +375,11 @@ class Page:
         :param redirect: Leave a redirect behind, if set to True.
         :returns: A dictionary containing the API query result.
         """
-        move_params = {"action": "move", "from": self.title,
-                       "to": target, "reason": reason,
-                       "movetalk": talk, "movesubpages": subpages,
-                       "noredirect": not redirect,
+        move_params = {
+            "action": "move", "from": self.title,
+            "to": target, "reason": reason,
+            "movetalk": talk, "movesubpages": subpages,
+            "noredirect": not redirect,
         }
         move_params = {k: v for (k, v) in move_params.items() if v}
         move_params['token'] = self._api.tokens['move']
@@ -396,8 +392,7 @@ class Page:
         return self._api.call(move_params)
 
     def delete(self, reason=""):
-        """
-        Delete the page.
+        """Delete the page.
 
         :type reason: str
         :param reason: The reason for the deletion.
@@ -416,8 +411,7 @@ class Page:
         return self._api.call(stuff)
 
     def undelete(self, reason=""):
-        """
-        Undelete the page.
+        """Undelete the page.
 
         :type reason: str
         :param reason: The reason for the undeletion.
@@ -436,8 +430,7 @@ class Page:
         return self._api.call(stuff)
 
     def from_revid(self, revid):
-        """
-        Returns a Page object by extracting information from the given revid.
+        """Returns a Page object by extracting information from the given revid.
 
         This method does not follow redirects, and the very process of calling
         the method makes an API query.
@@ -446,39 +439,44 @@ class Page:
         :param revid: The revision ID corresponding to the page being requested.
         :returns: A page.
         """
-        kwargs = {"prop": ("info", "revisions", "categories"),
-                  "inprop": "protection",
-                  "rvprop": ("user", "content"),
-                  "revids": revid,
+        kwargs = {
+            "prop": ("info", "revisions", "categories"),
+            "inprop": "protection",
+            "rvprop": ("user", "content"),
+            "revids": revid,
         }
-        res = self._api.iterator(use_defaults=False, **kwargs)
+        res = self._api.iterator(kwargs, use_defaults=False)
         p = type(self)(self._api, "some random title")
         p.load_attributes(tuple(res)[0])
         return p
 
     def load_revisions(self, num=float("inf")):
         """Call this to populate self.revisions. Specify the *num* parameter
-        to limit it to *num* revisions, in reverse chronological order."""
-        kwargs = {"prop": "revisions",
-                  "rvprop": ('ids', 'flags', 'timestamp',
-                             'user', 'comment', 'content'),
-                  "rvlimit": 'max' if num == float("inf") else num,
-                  "rvdir": "older",
-                  "rvstartid": self.revid,
+        to limit it to *num* revisions, in reverse chronological order.
+
+        The revision at index *n* will be closer to the current day than the
+        revision at index *n+1*."""
+        kwargs = {
+            "prop": "revisions",
+            "rvprop": (
+                'ids', 'flags', 'timestamp',
+                'user', 'comment', 'content'
+            ),
+            "rvlimit": 'max' if num == float("inf") else num,
+            "rvdir": "older",
+            "rvstartid": self.revid,
         }
         kwargs.update(self.identity())
         res = self._api.call(kwargs, use_defaults=False)
         revs = tuple(res['query']['pages'].values())[0]['revisions']
         for r in revs:
             revision_obj = Revision(self._api, r['revid'])
-            filler = {"pageid": self.pageid}
-            filler['revisions'] = (r,)
+            filler = {"pageid": self.pageid, 'revisions': (r,)}
             revision_obj.load_attributes(filler)
             self._revisions.append(revision_obj)
 
     def toggle_talk(self, follow_redirects=None):
-        """
-        Return a page with its namespace switched to or from the talk
+        """Return a page with its namespace switched to or from the talk
         namespace.
 
         :type follow_redirects: bool
@@ -513,8 +511,7 @@ class Page:
 
     @property
     def title(self) -> str:
-        """
-        Returns the page's title. If self.load_attributes() was not called
+        """Returns the page's title. If self.load_attributes() was not called
         prior to the execution of this method, the result will be equal to the
         *title* parameter passed to the constructor. Otherwise, it will be
         normalised.
@@ -525,8 +522,7 @@ class Page:
 
     @property
     def pageid(self) -> int:
-        """
-        An integer ID representing the page.
+        """An integer ID representing the page.
 
         :returns: The page's ID.
         """
@@ -535,8 +531,7 @@ class Page:
     @property
     @decorate
     def content(self) -> str:
-        """
-        Returns the page content, which is cached if you try to get this
+        """Returns the page content, which is cached if you try to get this
         attribute again.
 
         If the page does not exist, the method raises a NonexistentPageError.
@@ -549,8 +544,7 @@ class Page:
     @property
     @decorate
     def exists(self) -> bool:
-        """
-        Check the existence of the page.
+        """Check the existence of the page.
 
         :returns: True if the page exists, False otherwise
         """
@@ -559,8 +553,7 @@ class Page:
     @property
     @decorate
     def is_talkpage(self) -> bool:
-        """
-        Check if this page is in a talk namespace.
+        """Check if this page is in a talk namespace.
 
         :returns: True if the page is in a talk namespace, False otherwise
         """
@@ -569,8 +562,7 @@ class Page:
     @property
     @decorate
     def revision_user(self):
-        """
-        Returns the username or IP of the last user to edit the page.
+        """Returns the last user to edit the page.
 
         :returns: A User object
         :raises: NonexistentPageError, if the page doesn't exist or is invalid.
@@ -580,8 +572,7 @@ class Page:
         return attr
 
     def get_redirect_target(self):
-        """
-        Gets the Page object for the target this Page redirects to.
+        """Gets the Page object for the target this Page redirects to.
 
         If this Page doesn't exist, or is invalid, it will
         raise a NonexistentPageError, or InvalidPageError respectively. If the
@@ -624,8 +615,7 @@ class Page:
     @property
     @decorate
     def protection(self) -> dict:
-        """
-        Get the protection levels on the page.
+        """Get the protection levels on the page.
 
         :returns: A dict representing the page's protection level. The keys
                   are, by default, 'edit', 'create', and 'move'. If the wiki

@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-#-------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 # This file is part of Ceterach.
 # Copyright (C) 2013 Andrew Wang <andrewwang43@gmail.com>
 #
@@ -15,18 +15,20 @@
 #
 # You should have received a copy of the GNU Lesser General Public License
 # along with Ceterach.  If not, see <http://www.gnu.org/licenses/>.
-#-------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 
 import datetime
 
 from . import exceptions as exc
 from .utils import isostrptime, blah_decorate
 
+
 def decorate(meth):
     msg = "Revision {0!r} does not exist"
     attr = 'revid'
     err = exc.NonexistentRevisionError
     return blah_decorate(meth, msg, attr, err)
+
 
 class Revision:
 
@@ -53,12 +55,13 @@ class Revision:
     def __load(self, res):
         i = self._api.iterator
         rvprop = ('ids', 'flags', 'timestamp', 'user', 'comment', 'content')
-        kwargs = {"revids": self._revid,
-                  "prop": "revisions",
-                  "rvprop": rvprop,
-                  "rvtoken": "rollback"
+        kwargs = {
+            "revids": self._revid,
+            "prop": "revisions",
+            "rvprop": rvprop,
+            "rvtoken": "rollback"
         }
-        res = res or list(i(1, use_defaults=False, **kwargs))[0]
+        res = res or next(i(kwargs, use_defaults=False))
         self._page = self._api.page(res['pageid'])
         res = res['revisions'][0]
         self._summary = res['comment']
@@ -82,8 +85,7 @@ class Revision:
             self._is_deleted = False
 
     def restore(self, summary="", minor=False, bot=True, force=False):
-        """
-        Replace the page's content with the content found in this revision.
+        """Replace the page's content with the content found in this revision.
         *summary* is the edit summary used for the edit. The edit will be
         marked as minor if *minor* is True, and if *bot* is True and the
         logged-in user has the bot flag, it will also be marked as a bot
@@ -108,8 +110,7 @@ class Revision:
         return self.page.edit(self.content, summary, minor, bot, force)
 
     def rollback(self, summary="", bot=False):
-        """
-        Undo edits in reverse chronological order, and stop when the edit
+        """Undo edits in reverse chronological order, and stop when the edit
         about to be undone is made by a user different from the one who had
         most recently edited the page.
 
@@ -120,8 +121,9 @@ class Revision:
                     has the bot flag.
         :returns: A dictionary containing the API query result.
         """
-        params = {"title": self.page._api, "user": self.user.name,
-                  "token": self.rvtoken, "action": "rollback"
+        params = {
+            "title": self.page.title, "user": self.user.name,
+            "token": self.rvtoken, "action": "rollback"
         }
         try:
             params['token'] = self.rvtoken
@@ -143,7 +145,7 @@ class Revision:
     @property
     @decorate
     def revid(self) -> int:
-        "The revision id of the revision."
+        """The revision id of the revision."""
         return "_revid"
 
     @property
@@ -154,7 +156,7 @@ class Revision:
     @property
     @decorate
     def page(self):
-        "The page to which this revision was made."
+        """The page to which this revision was made."""
         #: :type: ceterach.page.Page
         attr = "_page"
         return attr
@@ -162,19 +164,19 @@ class Revision:
     @property
     @decorate
     def summary(self) -> str:
-        "The edit summary that describes this revision."
+        """The edit summary that describes this revision."""
         return "_summary"
 
     @property
     @decorate
     def timestamp(self)-> datetime.datetime:
-        "The time at which this revision was made."
+        """The time at which this revision was made."""
         return "_timestamp"
 
     @property
     @decorate
     def user(self):
-        "The user who made this revision."
+        """The user who made this revision."""
         #: :type: ceterach.user.User
         attr = "_user"
         return attr
@@ -182,13 +184,15 @@ class Revision:
     @property
     @decorate
     def is_minor(self) -> bool:
-        "True if this revision was a minor edit, otherwise False."
+        """True if this revision was a minor edit, otherwise False."""
         return "_is_minor"
 
     @property
     @decorate
     def prev_revision(self):
-        "The revision made before this one, which was made to the same page."
+        """The revision made before this one, which was made to the same
+        page.
+        """
         #: :type: ceterach.revision.Revision
         attr = "_prev_revision"
         return attr
@@ -196,11 +200,11 @@ class Revision:
     @property
     @decorate
     def content(self) -> str:
-        "The content of the page described by this revision."
+        """The content of the page described by this revision."""
         return "_content"
 
     @property
     @decorate
     def is_deleted(self) -> bool:
-        "True if the revision is deleted, otherwise False."
+        """True if the revision is deleted, otherwise False."""
         return "_is_deleted"

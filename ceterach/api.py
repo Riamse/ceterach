@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-#-------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # This file is part of Ceterach.
 # Copyright (C) 2013 Andrew Wang <andrewwang43@gmail.com>
 #
@@ -15,7 +15,7 @@
 #
 # You should have received a copy of the GNU Lesser General Public License
 # along with Ceterach.  If not, see <http://www.gnu.org/licenses/>.
-#-------------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 
 import itertools
 import collections
@@ -26,7 +26,7 @@ from copy import deepcopy
 
 import requests
 
-#from . import __version__ as cv
+# from . import __version__ as cv
 cv = '0.0.1'
 from . import exceptions as exc
 from .category import Category
@@ -35,32 +35,28 @@ from .page import Page
 from .user import User
 from .revision import Revision
 
-#stackoverflow.com/questions/3217492/list-of-language-codes-in-yaml-or-json
+# stackoverflow.com/questions/3217492/list-of-language-codes-in-yaml-or-json
 
 __all__ = ["MediaWiki"]
 
-#USER_AGENT = "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:14.0) Gecko/20100101 Firefox/14.0.1"
+# USER_AGENT = "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:14.0) Gecko/20100101 Firefox/14.0.1"
 USER_AGENT = "Ceterach/%s (Python %s; mailto:andrewwang43@gmail.com)"
 USER_AGENT %= cv, pyv()
 def_config = {"throttle": 0,
               "retries": 1,
               "sleep": 5,
               "get": ('query', 'purge'),
-              "defaults": {"maxlag": 5, "assert": "user"},
-              "iterdefaults": {"rawcontinue": ""}
+              "defaults": {"maxlag": 5, "assert": "user"}
 }
 
-#def_config['defaults']['rawcontinue'] = ''  # At some point this became required.
 
 class MediaWiki:
-
     def __init__(self, api_url="http://en.wikipedia.org/w/api.php", config=None):
 #    def __init__(self, api_url="http://wiki.ciit.zp.ua/api.php", config=None): # 1.16
 #    def __init__(self, api_url="http://wiki.mako.cc/api.php", config=None): # 1.19
 #    def __init__(self, api_url="http://test.wikipedia.org/w/api.php", config=None): # newest
-    # def __init__(self, api_url="http://localhost:8080/srv/mediawiki/api.php", config=None): # 1.20
-        """
-        *api_url* is the full url to the wiki's API (default:
+#    def __init__(self, api_url="http://localhost:8080/srv/mediawiki/api.php", config=None): # 1.20
+        """*api_url* is the full url to the wiki's API (default:
         ``"http://en.wikipedia.org/w/api.php"``).
 
         *config* is a dictionary whose keys are:
@@ -89,10 +85,6 @@ class MediaWiki:
                      refer to `the
                      docs <https://www.mediawiki.org/wiki/API:Assert>`_\.
 
-        - *iterdefaults* is a dict that functions similarly to *defaults*, but
-          only applies to the .iterator() method (default:
-          ``{"rawcontinue": ""}``).
-
         *config* can also be a dictionary that only contains those parameters
         you wish to modify. Passing ``{"throttle": 3.14}``, for example, will
         result in a dictionary with the above parameters, except the throttle
@@ -119,41 +111,44 @@ class MediaWiki:
         return getattr(other, 'api_url', None) != self.api_url
 
     def category(self, identity, follow_redirects=False) -> Category:
-        """
-        Returns a Category object for *identity*, which represents either a
+        """Returns a Category object for *identity*, which represents either a
         title or pageid.
 
         This method does not follow redirects, or check if the title is
         invalid. Those checks will be done when the Category's attributes are
         loaded.
         """
-        params = {"follow_redirects": follow_redirects}
-        params['pageid' if isinstance(identity, int) else 'title'] = identity
+        params = {
+            "follow_redirects": follow_redirects,
+            'pageid' if isinstance(identity, int) else 'title': identity
+        }
         return Category(self, **params)
 
     def file(self, identity, follow_redirects=False) -> File:
-        """
-        Returns a File object for *identity*, which represents either a
+        """Returns a File object for *identity*, which represents either a
         title or pageid.
 
         This method does not follow redirects, or check if the title is
         invalid. Those checks will be done when the Category's attributes are
         loaded.
         """
-        params = {"follow_redirects": follow_redirects}
-        params['pageid' if isinstance(identity, int) else 'title'] = identity
+        params = {
+            "follow_redirects": follow_redirects,
+            'pageid' if isinstance(identity, int) else 'title': identity
+        }
         return File(self, **params)
 
     def page(self, identity, follow_redirects=False) -> Page:
-        """
-        Returns a Page object for *identity*, which represents either a
+        """Returns a Page object for *identity*, which represents either a
         title or pageid.
 
         This method does not follow redirects, or check if the title is
         invalid. Those will be done when the Page's attributes are loaded.
         """
-        params = {"follow_redirects": follow_redirects}
-        params['pageid' if isinstance(identity, int) else 'title'] = identity
+        params = {
+            "follow_redirects": follow_redirects,
+            'pageid' if isinstance(identity, int) else 'title': identity
+        }
         return Page(self, **params)
 
     def user(self, identity) -> User:
@@ -163,59 +158,20 @@ class MediaWiki:
         return User(self, identity)
 
     def revision(self, identity) -> Revision:
-        """
-        Returns a Revision object for *identity*, which represents the revid.
+        """Returns a Revision object for *identity*, which represents the revid.
 
         This method does not check if the revid is valid. That will be done
         when the Revision's attributes are loaded.
         """
         return Revision(self, identity)
 
-    def call(self, params=None, **more_params):
-        """
-        Sends an API query to the wiki.
-        *params* is a dict representing the query parameters.
-
-        If *use_defaults* is True, the parameters specified in
-        MediaWiki.config['defaults'] will be added to *params* if they are
-        not already specified.
-
-        If kwargs are specified in *more_params*, they will be used to update
-        *params* before the request is sent.
-
-        If the action is not specified it defaults to 'query'.
-
-        Then, the 'format' key of *params* will be set to 'json'. In a word: ::
-
-            if use_defaults:
-                for k, v in defaults.items():
-                    params.setdefault(k, v)
-            for k, v in more_params.items(): params[k] = v
-            params.setdefault("action", "query")
-            params['format'] = 'json'
-
-        If everything succeeded, the JSON data will be coerced to a Python
-        object and returned.
-        """
+    def _call(self, params, more_params=None, use_defaults=False):
         time_since_last_query = time() - self.last_query
         conf = self.config
         throttle = conf['throttle']
         if throttle and time_since_last_query < throttle:
             sleep(throttle - time_since_last_query)
-        if not params:
-            params = {}
-        params = params.copy()
-        if params.setdefault("use_defaults", more_params.get("use_defaults", True)):
-            for (k, v) in conf['defaults'].items():
-                params.setdefault(k, v)
-        for (k, v) in more_params.items():
-            params[k] = v
-        del params["use_defaults"]
-        params.setdefault("action", "query")
-        params['format'] = 'json'
-        for (k, v) in params.items():
-            if isinstance(v, collections.Iterable) and not isinstance(v, str):
-                params[k] = "|".join(str(i) for i in v)
+        params = self._build_call_params(params, more_params, use_defaults)
         is_get = params['action'] in conf['get']
         raiseme = None
         urlopen = getattr(self.opener, 'get' if is_get else 'post')
@@ -245,14 +201,14 @@ class MediaWiki:
                         ret = res.json()
                     except (requests.HTTPError, requests.ConnectionError) as e:
                         raiseme = exc.ApiError(e)
-                    if not 'error' in ret:
+                    if 'error' not in ret:
                         break
                 else:
                     raiseme = exc.ApiError(err.format(retries[0]))
             else:
                 raiseme = exc.CeterachError(ret['error']['info'])
         if raiseme:
-            if not 'error' in ret:
+            if 'error' not in ret:
                 code = 'py'
             else:
                 code = ret["error"].get("code", "py")
@@ -260,9 +216,62 @@ class MediaWiki:
             raise raiseme
         return ret
 
-    def login(self, username, password):
+    def _build_call_params(self, params, more_params, use_defaults):
+        final_dict = {}
+        for (k, v) in params.items():
+            final_dict[k] = v
+        if use_defaults:
+            for (k, v) in self.config['defaults'].items():
+                final_dict.setdefault(k, v)
+        if more_params:
+            for (k, v) in more_params.items():
+                final_dict[k] = v
+        for (k, v) in final_dict.items():
+            if isinstance(v, (list, tuple)):
+                final_dict[k] = "|".join(str(i) for i in v)
+        final_dict.setdefault("action", "query")
+        final_dict['format'] = 'json'
+        return final_dict
+
+    def call(self, params=None, **more_params):
+        """Sends an API query to the wiki.
+        *params* is a dict representing the query parameters.
+
+        If the *use_defaults* parameter (accepted only as a kwarg) is True,
+        the parameters specified in MediaWiki.config['defaults'] will be
+        added to *params* if they are not already specified.
+
+        Next, if *more_params* is specified, it will be used to update
+        *params*.
+
+        If the same key appears in *params*, Mediawiki.config['defaults'],
+        and *more_params*, then the keys of *more_params* take precedence
+        over the keys of *params* and the keys of *params* take precedence
+        over the keys of Mediawiki.config['defaults'].
+
+        If the action is not specified it defaults to 'query'. The format
+        key will be set to 'json'.
+
+        To illustrate this, suppose that ``api = MediaWiki()`` and
+        ``api.config["defaults"] = {"default": 1}``. The call method, given
+        these arguments, will send the dict in the comment to the API::
+
+            api.call({"p": 1}) # p=1, format='json', action='query', default=1
+            api.call({"action": "edit", "p": 1}) # p=1, format='json', action='edit', default=1
+            api.call({"p": 1}, use_defaults=False) # p=1, action='query', format='json'
+            api.call({"p": 1, 'default': 0}) # p=1, format='json', action='query', default=0
+            api.call({"p": 1}, default=100) # p=1, format='json', action='query', default=100
+            api.call({"p": 1, 'default': 0}, default=1000) # p=1, format='json', action='query', default=1000
+
+        If everything succeeded, we return the JSON data.
         """
-        Try to log the bot in.
+        if not params:
+            params = {}
+        use_defaults = more_params.pop("use_defaults", True)
+        return self._call(params, more_params, use_defaults=use_defaults)
+
+    def login(self, username, password):
+        """Try to log in with the given username and password.
 
         :type username: str
         :param username: Username to log in as.
@@ -282,16 +291,14 @@ class MediaWiki:
         return False
 
     def logout(self):
-        """
-        Log the bot out.
+        """Log the bot out.
 
         :returns: True
         """
         return self.call(action="logout", use_defaults=False) == []
 
     def set_token(self, *args):
-        """
-        Sets the Wiki's ``tokens`` attribute with the tokens specified in
+        """Sets the Wiki's ``tokens`` attribute with the tokens specified in
         the *args*.
 
         If *args* are not specified, they will default to ``'edit'``.
@@ -306,8 +313,10 @@ class MediaWiki:
             res = self.call(query)
         except exc.CeterachError:
             # The wiki does not support action=tokens
-            query = {"prop": "info", "titles": "some random title",
-                     "action": "query", "intoken": received}
+            query = {
+                "prop": "info", "titles": "some random title",
+                "action": "query", "intoken": received
+            }
             res = self.call(query)['query']['pages']
             for prop, value in list(res.values())[0].items():
                 if prop.endswith("token"):
@@ -317,9 +326,8 @@ class MediaWiki:
             for token_name, token_value in res['tokens'].items():
                 self._tokens[token_name[:-5]] = token_value
 
-    def expand_templates(self, title, text, include_comments=False):
-        """
-        Evaluate the templates in *text* and return the processed result.
+    def expand_templates(self, title, text, include_comments=False) -> str:
+        """Evaluate the templates in *text* and return the processed result.
 
         For more information, see `MediaWiki docs <http://www.mediawiki.org/wi
         ki/API:Parsing_wikitext#expandtemplates>`_.
@@ -333,97 +341,18 @@ class MediaWiki:
                       {{PAGENAME}}.
         :type text: str
         :param text: Wikicode to process.
-        :type includecomments: bool
-        :param includecomments: Whether to include HTML comments in the output.
+        :type include_comments: bool
+        :param include_comments: Whether to include HTML comments in the output.
                                 Defaults to False.
         :returns: Text with templates expanded.
         """
         params = {"action": "expandtemplates", "title": title, "text": text}
         if include_comments:
             params['includecomments'] = True
-        return self.call(use_defaults=False, **params)['expandtemplates']["*"]
-
-    def iterator(self, params=None, limit=float("inf"), **more_params):
-        """
-        Iterates over an API query, so you no longer have to use something like: ::
-            >>> res = api.call(action="query", ...)
-            >>> res["query"]["pages"][tuple(res["query"]["pages"].keys())[0]][...]
-
-        :type params: dict
-        :param params: Parameters to the query.
-        :type limit: numbers.Real
-        :param limit: The maximum number of items the iterator will yield.
-                      Defaults to infinity.
-        :param more_params: Parameters to the query, which will be added to
-                            *params*. See .call() for similar behaviour.
-
-        :returns: A generator that probably contains dicts.
-
-        Example usage: ::
-
-            >>> for s in api.iterator(list="allpages", apnamespace=0, aplimit=1, limit=3):
-            ...     print(s)
-            ...
-            {'ns': 0, 'pageid': 5878274, 'title': '!'}
-            {'ns': 0, 'pageid': 3632887, 'title': '!!'}
-            {'ns': 0, 'pageid': 600744, 'title': '!!!'}
-
-        """
-        # do the use_defaults stuff here and take it out before passing it
-        # to .call()
-        conf = self.config
-        if not params:
-            params = {"action": "query"}
-
-        if params.setdefault("use_defaults", more_params.get("use_defaults", True)):
-            for (k, v) in conf['defaults'].items():
-                params.setdefault(k, v)
-
-        if params.setdefault('use_iterdefaults', more_params.get("use_iterdefaults", True)):
-            for (k, v) in conf['iterdefaults'].items():
-                params.setdefault(k, v)
-
-        for (k, v) in more_params.items():
-            params[k] = v
-
-        del params['use_defaults']
-        del params['use_iterdefaults']
-        l = 0
-        while True:
-            res = self.call(params, use_defaults=False)
-            #print("QUERY")
-            if isinstance(res['query'], list):
-                return
-            res['query'].pop("normalized", 0)
-            res['query'].pop("redirects", 0)
-            res['query'].pop("interwiki", 0)
-            a_res = res['query'].values()
-            if len(a_res) > 1:
-                X = StopIteration  # or maybe exc.ApiError?
-                err = "Too many nodes under the query node: "
-                raise X(err + ", ".join(res['query'].keys()))
-            else:
-                ret = list(a_res)[0]
-                if isinstance(ret, dict):
-                    ret = list(ret.values())
-            for r in ret:
-                yield r
-                l += 1
-                if l >= limit:
-                    return
-            if 'query-continue' in res:
-                c, p = {}, {}
-                for p_, n in res['query-continue'].items():
-                    for k, v in n.items():
-                        c[k] = v
-                        p[p_] = 1  # what is this even doing here
-            else:
-                return
-            params.update(c)
+        return self.call(params, use_defaults=False)['expandtemplates']["*"]
 
     def olditerator(self, params=None, limit=float("inf"), **more_params):
-        """
-        Iterates over an API query, so you no longer have to use something like: ::
+        """Iterates over an API query, so you no longer have to use something like: ::
             >>> res = api.call(action="query", ...)
             >>> res["query"]["pages"][tuple(res["query"]["pages"].keys())[0]][...]
 
@@ -447,29 +376,13 @@ class MediaWiki:
             {'ns': 0, 'pageid': 600744, 'title': '!!!'}
 
         """
-        # do the use_defaults stuff here and take it out before passing it
-        # to .call()
-        conf = self.config
         if not params:
-            params = {"action": "query"}
-
-        if params.setdefault("use_defaults", more_params.get("use_defaults", True)):
-            for (k, v) in conf['defaults'].items():
-                params.setdefault(k, v)
-
-        if params.setdefault('use_iterdefaults', more_params.get("use_iterdefaults", True)):
-            for (k, v) in conf['iterdefaults'].items():
-                params.setdefault(k, v)
-
-        for (k, v) in more_params.items():
-            params[k] = v
-
-        del params['use_defaults']
-        del params['use_iterdefaults']
+            params = {}
+        params = params.copy()
         l = 0
         while True:
-            res = self.call(params, use_defaults=False)
-            #print("QUERY")
+            res = self.call(params, rawcontinue='', **more_params)
+            # print("QUERY")
             if isinstance(res['query'], list):
                 return
             res['query'].pop("normalized", 0)
@@ -477,7 +390,8 @@ class MediaWiki:
             res['query'].pop("interwiki", 0)
             a_res = res['query'].values()
             if len(a_res) > 1:
-                X = StopIteration  # or maybe exc.ApiError?
+                # eg if you specify both a list= and prop=
+                X = ValueError
                 err = "Too many nodes under the query node: "
                 raise X(err + ", ".join(res['query'].keys()))
             else:
@@ -500,8 +414,7 @@ class MediaWiki:
             params.update(c)
 
     def newiterator(self, params=None, limit=float("inf"), **more_params):
-        """
-        Iterates over an API query, so you no longer have to use something like: ::
+        """Iterates over an API query, so you no longer have to use something like: ::
             >>> res = api.call(action="query", ...)
             >>> res["query"]["pages"][tuple(res["query"]["pages"].keys())[0]][...]
 
@@ -525,29 +438,12 @@ class MediaWiki:
             {'ns': 0, 'pageid': 600744, 'title': '!!!'}
 
         """
-        # do the use_defaults stuff here and take it out before passing it
-        # to .call()
-        conf = self.config
         if not params:
-            params = {"action": "query"}
-
-        if params.setdefault("use_defaults", more_params.get("use_defaults", True)):
-            for (k, v) in conf['defaults'].items():
-                params.setdefault(k, v)
-
-        if params.setdefault('use_iterdefaults', more_params.get("use_iterdefaults", True)):
-            for (k, v) in conf['iterdefaults'].items():
-                params.setdefault(k, v)
-
-        for (k, v) in more_params.items():
-            params[k] = v
-
-        del params['use_defaults']
-        del params['use_iterdefaults']
+            params = {}
+        params = params.copy()
         l = 0
         while True:
-            res = self.call(params, use_defaults=False)
-            #print("QUERY")
+            res = self.call(params, **more_params)
             if isinstance(res['query'], list):
                 return
             res['query'].pop("normalized", 0)
@@ -555,7 +451,8 @@ class MediaWiki:
             res['query'].pop("interwiki", 0)
             a_res = res['query'].values()
             if len(a_res) > 1:
-                X = StopIteration  # or maybe exc.ApiError?
+                # eg if you specify both a list= and prop=
+                X = ValueError
                 err = "Too many nodes under the query node: "
                 raise X(err + ", ".join(res['query'].keys()))
             else:
@@ -573,10 +470,12 @@ class MediaWiki:
                 return
             params.update(c)
 
+    iterator = olditerator
+
     @property
     def tokens(self):
         """A mapping of the token name to the token."""
-        return deepcopy(self._tokens)
+        return self._tokens
 
     @property
     def namespaces(self):
