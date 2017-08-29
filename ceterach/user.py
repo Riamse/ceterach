@@ -150,6 +150,15 @@ class User:
             "action": "emailuser", "target": self.name,
             "subject": subject, "text": text
         }
+        try:
+            token = self._api.tokens['email']
+        except KeyError:
+            self._api.set_token("email")
+            token = self._api.tokens.get('email', None)
+            if token is None:
+                err = "You do not have the email permission"
+                raise exc.PermissionsError(err)
+        params['token'] = token
         if cc:
             params['ccme'] = True
         try:
