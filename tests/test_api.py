@@ -40,6 +40,17 @@ class TestMediaWiki(TestCase):
     def setup_class(self):
         self.api = api.MediaWiki(WIKI_BASE)
 
+    def test_repr(self):
+        assert repr(self.api).startswith('MediaWiki(api_url=\'' + WIKI_BASE)
+
+    def test_eq(self):
+        assert self.api == api.MediaWiki(WIKI_BASE)
+        assert self.api != api.MediaWiki(reversed(WIKI_BASE))
+
+    def test_page(self):
+        page = self.api.page('Noodling')
+        assert page.title == 'Noodling'
+
     @_test_for({'tokens': {'csrftoken': TEST_TOKEN}})
     def test_tokens_action_tokens(self):
         self.api.set_token()
