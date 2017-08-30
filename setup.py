@@ -29,7 +29,8 @@ def read_long_description():
         return ''
 
 required_packages = ['pytest-runner', 'requests>=1.0.3', 'arrow>=0.3.5']
-test_packages = ['requests_mock>=1.3.0', 'pytest', 'pytest-cov']
+test_packages = ['requests_mock>=1.3.0', 'decorator>=4.1.2',
+                 'pytest', 'pytest-cov']
 
 setup(name='ceterach',
       version='0.0.1',
