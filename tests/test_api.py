@@ -1,5 +1,4 @@
 from unittest import TestCase
-from unittest.mock import patch
 
 import requests_mock
 
@@ -63,13 +62,13 @@ class TestMediaWiki(TestCase):
         assert ('edit', TEST_TOKEN) in self.api.tokens.items()
 
     @_test_for(q({'namespaces': [{'id': 0,
-                                      'case': 'first-letter',
-                                      'content': '',
-                                      '*': ''},
+                                  'case': 'first-letter',
+                                  'content': '',
+                                  '*': ''},
                                  {'id': 1337,
-                                      'case': 'first-letter',
-                                      'canonical': 'Spam',
-                                      '*': 'Spam'}]}))
+                                  'case': 'first-letter',
+                                  'canonical': 'Spam',
+                                  '*': 'Spam'}]}))
     def test_namespaces(self):
         ns = self.api.namespaces
         assert len(ns) == 2
