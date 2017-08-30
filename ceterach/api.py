@@ -227,7 +227,7 @@ class MediaWiki:
             for (k, v) in more_params.items():
                 final_dict[k] = v
         for (k, v) in final_dict.items():
-            if isinstance(v, (list, tuple)):
+            if isinstance(v, (list, tuple, set)):
                 final_dict[k] = "|".join(str(i) for i in v)
         final_dict.setdefault("action", "query")
         final_dict['format'] = 'json'
