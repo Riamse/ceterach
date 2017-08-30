@@ -22,21 +22,21 @@ try:
 except ImportError:
     from distutils.core import setup
 
-from ceterach import __version__
-
 def read_long_description():
     try:
         return open("README.md").read()
     except FileNotFoundError:
         return ''
 
-required_packages = ['requests>=1.0.3', 'arrow>=0.3.5']
+required_packages = ['pytest-runner', 'requests>=1.0.3', 'arrow>=0.3.5']
+test_packages = ['requests_mock>=1.3.0', 'pytest', 'pytest-cov']
 
 setup(name='ceterach',
-      version=__version__,
+      version='0.0.1',
       packages=['ceterach'],
       setup_requires=required_packages,
       install_requires=required_packages,
+      tests_require=test_packages,
       url='https://github.com/Riamse/ceterach',
       license='GNU Lesser General Public License v3 or later',
       author='Andrew Wang',
