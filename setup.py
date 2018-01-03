@@ -22,7 +22,12 @@ try:
 except ImportError:
     from distutils.core import setup
 
-from ceterach.version import __version__
+# Load __version__ and __author__ from __init__.py without executing the entire
+# file.
+with open('ceterach/__init__.py', 'r') as f:
+    for l in f.readlines():
+        if l[:12] in ('__version__ ', '__author__ ='):
+            exec(l)
 
 def read_long_description():
     try:
@@ -32,6 +37,7 @@ def read_long_description():
 
 required_packages = ['requests>=1.0.3', 'arrow>=0.3.5']
 
+
 setup(name='ceterach',
       version=__version__,
       packages=['ceterach'],
@@ -39,7 +45,7 @@ setup(name='ceterach',
       install_requires=required_packages,
       url='https://github.com/Riamse/ceterach',
       license='GNU Lesser General Public License v3 or later',
-      author='Andrew Wang',
+      author=__author__,
       author_email='andrewwang43@gmail.com',
       description='An interface for interacting with MediaWiki',
       long_description=read_long_description(),

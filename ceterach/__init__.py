@@ -18,4 +18,7 @@
 #-------------------------------------------------------------------------------
 
 from . import api, page, category, file, revision, user, exceptions
-from .version import __author__, __version__
+
+
+__author__ = "Andrew Wang"
+__version__ = "0.0.1"
