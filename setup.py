@@ -22,7 +22,7 @@ try:
 except ImportError:
     from distutils.core import setup
 
-from ceterach import __version__
+from ceterach.version import __version__
 
 def read_long_description():
     try:
