@@ -1,0 +1,1484 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>ceterach documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="documentation-for-ceterach">
+<h1>Documentation for ceterach<a class="headerlink" href="#documentation-for-ceterach" title="Permalink to this headline">¶</a></h1>
+<p>Ceterach is an interface for interacting with MediaWiki.</p>
+<div class="section" id="contents">
+<h2>Contents<a class="headerlink" href="#contents" title="Permalink to this headline">¶</a></h2>
+<div class="toctree-wrapper compound">
+<span id="document-api"></span><div class="section" id="api-module">
+<h3>api module<a class="headerlink" href="#api-module" title="Permalink to this headline">¶</a></h3>
+<p>Ceterach is an interface for interacting with MediaWiki.</p>
+<span class="target" id="module-ceterach.api"></span><dl class="class">
+<dt id="ceterach.api.MediaWiki">
+<em class="property">class </em><code class="descclassname">ceterach.api.</code><code class="descname">MediaWiki</code><span class="sig-paren">(</span><em>api_url='http://en.wikipedia.org/w/api.php'</em>, <em>config=None</em><span class="sig-paren">)</span><a class="headerlink" href="#ceterach.api.MediaWiki" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="method">
+<dt id="ceterach.api.MediaWiki.call">
+<code class="descname">call</code><span class="sig-paren">(</span><em>params=None</em>, <em>**more_params</em><span class="sig-paren">)</span><a class="headerlink" href="#ceterach.api.MediaWiki.call" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sends an API query to the wiki.
+<em>params</em> is a dict representing the query parameters.</p>
+<p>If the <em>use_defaults</em> parameter (accepted only as a kwarg) is True,
+the parameters specified in MediaWiki.config[‘defaults’] will be
+added to <em>params</em> if they are not already specified.</p>
+<p>Next, if <em>more_params</em> is specified, it will be used to update
+<em>params</em>.</p>
+<p>If the same key appears in <em>params</em>, Mediawiki.config[‘defaults’],
+and <em>more_params</em>, then the keys of <em>more_params</em> take precedence
+over the keys of <em>params</em> and the keys of <em>params</em> take precedence
+over the keys of Mediawiki.config[‘defaults’].</p>
+<p>If the action is not specified it defaults to ‘query’. The format
+key will be set to ‘json’.</p>
+<p>To illustrate this, suppose that <code class="docutils literal notranslate"><span class="pre">api</span> <span class="pre">=</span> <span class="pre">MediaWiki()</span></code> and
+<code class="docutils literal notranslate"><span class="pre">api.config[&quot;defaults&quot;]</span> <span class="pre">=</span> <span class="pre">{&quot;default&quot;:</span> <span class="pre">1}</span></code>. The call method, given
+these arguments, will send the dict in the comment to the API:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">api</span><span class="o">.</span><span class="n">call</span><span class="p">({</span><span class="s2">&quot;p&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">})</span> <span class="c1"># p=1, format=&#39;json&#39;, action=&#39;query&#39;, default=1</span>
+<span class="n">api</span><span class="o">.</span><span class="n">call</span><span class="p">({</span><span class="s2">&quot;action&quot;</span><span class="p">:</span> <span class="s2">&quot;edit&quot;</span><span class="p">,</span> <span class="s2">&quot;p&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">})</span> <span class="c1"># p=1, format=&#39;json&#39;, action=&#39;edit&#39;, default=1</span>
+<span class="n">api</span><span class="o">.</span><span class="n">call</span><span class="p">({</span><span class="s2">&quot;p&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">},</span> <span class="n">use_defaults</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="c1"># p=1, action=&#39;query&#39;, format=&#39;json&#39;</span>
+<span class="n">api</span><span class="o">.</span><span class="n">call</span><span class="p">({</span><span class="s2">&quot;p&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;default&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">})</span> <span class="c1"># p=1, format=&#39;json&#39;, action=&#39;query&#39;, default=0</span>
+<span class="n">api</span><span class="o">.</span><span class="n">call</span><span class="p">({</span><span class="s2">&quot;p&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">},</span> <span class="n">default</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span> <span class="c1"># p=1, format=&#39;json&#39;, action=&#39;query&#39;, default=100</span>
+<span class="n">api</span><span class="o">.</span><span class="n">call</span><span class="p">({</span><span class="s2">&quot;p&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;default&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">},</span> <span class="n">default</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span> <span class="c1"># p=1, format=&#39;json&#39;, action=&#39;query&#39;, default=1000</span>
+</pre></div>
+</div>
+<p>If everything succeeded, we return the JSON data.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ceterach.api.MediaWiki.category">
+<code class="descname">category</code><span class="sig-paren">(</span><em>identity</em>, <em>follow_redirects=False</em><span class="sig-paren">)</span> &#x2192; ceterach.category.Category<a class="headerlink" href="#ceterach.api.MediaWiki.category" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a Category object for <em>identity</em>, which represents either a
+title or pageid.</p>
+<p>This method does not follow redirects, or check if the title is
+invalid. Those checks will be done when the Category’s attributes are
+loaded.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ceterach.api.MediaWiki.expand_templates">
+<code class="descname">expand_templates</code><span class="sig-paren">(</span><em>title</em>, <em>text</em>, <em>include_comments=False</em><span class="sig-paren">)</span> &#x2192; str<a class="headerlink" href="#ceterach.api.MediaWiki.expand_templates" title="Permalink to this definition">¶</a></dt>
+<dd><p>Evaluate the templates in <em>text</em> and return the processed result.</p>
+<p>For more information, see <a class="reference external" href="http://www.mediawiki.org/wiki/API:Parsing_wikitext#expandtemplates">MediaWiki docs</a>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>title</strong> (<em>str</em>) – Act like the wikicode is on this page (default:
+<code class="docutils literal notranslate"><span class="pre">&quot;API&quot;</span></code>).
+This only really matters when parsing links to the page
+itself or links to subpages, or when using <a class="reference external" href="http://www.mediawiki.org/wiki/Help:Magic_words">magic words</a> like
+{{PAGENAME}}.</li>
+<li><strong>text</strong> (<em>str</em>) – Wikicode to process.</li>
+<li><strong>include_comments</strong> (<em>bool</em>) – Whether to include HTML comments in the output.
+Defaults to False.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">Text with templates expanded.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="ceterach.api.MediaWiki.file">
+<code class="descname">file</code><span class="sig-paren">(</span><em>identity</em>, <em>follow_redirects=False</em><span class="sig-paren">)</span> &#x2192; ceterach.file.File<a class="headerlink" href="#ceterach.api.MediaWiki.file" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a File object for <em>identity</em>, which represents either a
+title or pageid.</p>
+<p>This method does not follow redirects, or check if the title is
+invalid. Those checks will be done when the Category’s attributes are
+loaded.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ceterach.api.MediaWiki.iterator">
+<code class="descname">iterator</code><span class="sig-paren">(</span><em>params=None</em>, <em>limit=inf</em>, <em>**more_params</em><span class="sig-paren">)</span><a class="headerlink" href="#ceterach.api.MediaWiki.iterator" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>Iterates over an API query, so you no longer have to use something like: ::</dt>
+<dd><div class="first last highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">res</span> <span class="o">=</span> <span class="n">api</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">action</span><span class="o">=</span><span class="s2">&quot;query&quot;</span><span class="p">,</span> <span class="o">...</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">res</span><span class="p">[</span><span class="s2">&quot;query&quot;</span><span class="p">][</span><span class="s2">&quot;pages&quot;</span><span class="p">][</span><span class="nb">tuple</span><span class="p">(</span><span class="n">res</span><span class="p">[</span><span class="s2">&quot;query&quot;</span><span class="p">][</span><span class="s2">&quot;pages&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">())[</span><span class="mi">0</span><span class="p">]][</span><span class="o">...</span><span class="p">]</span>
+</pre></div>
+</div>
+</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>params</strong> (<em>dict</em>) – Parameters to the query.</li>
+<li><strong>limit</strong> (<em>numbers.Real</em>) – The maximum number of items the iterator will yield.
+Defaults to infinity.</li>
+<li><strong>more_params</strong> – Parameters to the query, which will be added to
+<em>params</em>. See .call() for similar behaviour.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">A generator that probably contains dicts.</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Example usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">api</span><span class="o">.</span><span class="n">iterator</span><span class="p">(</span><span class="nb">list</span><span class="o">=</span><span class="s2">&quot;allpages&quot;</span><span class="p">,</span> <span class="n">apnamespace</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">aplimit</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="mi">3</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="nb">print</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+<span class="gp">...</span>
+<span class="go">{&#39;ns&#39;: 0, &#39;pageid&#39;: 5878274, &#39;title&#39;: &#39;!&#39;}</span>
+<span class="go">{&#39;ns&#39;: 0, &#39;pageid&#39;: 3632887, &#39;title&#39;: &#39;!!&#39;}</span>
+<span class="go">{&#39;ns&#39;: 0, &#39;pageid&#39;: 600744, &#39;title&#39;: &#39;!!!&#39;}</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="ceterach.api.MediaWiki.login">
+<code class="descname">login</code><span class="sig-paren">(</span><em>username</em>, <em>password</em><span class="sig-paren">)</span><a class="headerlink" href="#ceterach.api.MediaWiki.login" title="Permalink to this definition">¶</a></dt>
+<dd><p>Try to log in with the given username and password.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>username</strong> (<em>str</em>) – Username to log in as.</li>
+<li><strong>password</strong> (<em>str</em>) – Password that corresponds to the username.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">True if the login succeeded, False if not.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="ceterach.api.MediaWiki.logout">
+<code class="descname">logout</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ceterach.api.MediaWiki.logout" title="Permalink to this definition">¶</a></dt>
+<dd><p>Log the bot out.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">True</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ceterach.api.MediaWiki.namespaces">
+<code class="descname">namespaces</code><a class="headerlink" href="#ceterach.api.MediaWiki.namespaces" title="Permalink to this definition">¶</a></dt>
+<dd><p>A mapping of the namespace number to the namespace name.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ceterach.api.MediaWiki.newiterator">
+<code class="descname">newiterator</code><span class="sig-paren">(</span><em>params=None</em>, <em>limit=inf</em>, <em>**more_params</em><span class="sig-paren">)</span><a class="headerlink" href="#ceterach.api.MediaWiki.newiterator" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>Iterates over an API query, so you no longer have to use something like: ::</dt>
+<dd><div class="first last highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">res</span> <span class="o">=</span> <span class="n">api</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">action</span><span class="o">=</span><span class="s2">&quot;query&quot;</span><span class="p">,</span> <span class="o">...</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">res</span><span class="p">[</span><span class="s2">&quot;query&quot;</span><span class="p">][</span><span class="s2">&quot;pages&quot;</span><span class="p">][</span><span class="nb">tuple</span><span class="p">(</span><span class="n">res</span><span class="p">[</span><span class="s2">&quot;query&quot;</span><span class="p">][</span><span class="s2">&quot;pages&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">())[</span><span class="mi">0</span><span class="p">]][</span><span class="o">...</span><span class="p">]</span>
+</pre></div>
+</div>
+</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>params</strong> (<em>dict</em>) – Parameters to the query.</li>
+<li><strong>limit</strong> (<em>numbers.Real</em>) – The maximum number of items the iterator will yield.
+Defaults to infinity.</li>
+<li><strong>more_params</strong> – Parameters to the query, which will be added to
+<em>params</em>. See .call() for similar behaviour.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">A generator that probably contains dicts.</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Example usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">api</span><span class="o">.</span><span class="n">iterator</span><span class="p">(</span><span class="nb">list</span><span class="o">=</span><span class="s2">&quot;allpages&quot;</span><span class="p">,</span> <span class="n">apnamespace</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">aplimit</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="mi">3</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="nb">print</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+<span class="gp">...</span>
+<span class="go">{&#39;ns&#39;: 0, &#39;pageid&#39;: 5878274, &#39;title&#39;: &#39;!&#39;}</span>
+<span class="go">{&#39;ns&#39;: 0, &#39;pageid&#39;: 3632887, &#39;title&#39;: &#39;!!&#39;}</span>
+<span class="go">{&#39;ns&#39;: 0, &#39;pageid&#39;: 600744, &#39;title&#39;: &#39;!!!&#39;}</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="ceterach.api.MediaWiki.olditerator">
+<code class="descname">olditerator</code><span class="sig-paren">(</span><em>params=None</em>, <em>limit=inf</em>, <em>**more_params</em><span class="sig-paren">)</span><a class="headerlink" href="#ceterach.api.MediaWiki.olditerator" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>Iterates over an API query, so you no longer have to use something like: ::</dt>
+<dd><div class="first last highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">res</span> <span class="o">=</span> <span class="n">api</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">action</span><span class="o">=</span><span class="s2">&quot;query&quot;</span><span class="p">,</span> <span class="o">...</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">res</span><span class="p">[</span><span class="s2">&quot;query&quot;</span><span class="p">][</span><span class="s2">&quot;pages&quot;</span><span class="p">][</span><span class="nb">tuple</span><span class="p">(</span><span class="n">res</span><span class="p">[</span><span class="s2">&quot;query&quot;</span><span class="p">][</span><span class="s2">&quot;pages&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">())[</span><span class="mi">0</span><span class="p">]][</span><span class="o">...</span><span class="p">]</span>
+</pre></div>
+</div>
+</dd>
+</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>params</strong> (<em>dict</em>) – Parameters to the query.</li>
+<li><strong>limit</strong> (<em>numbers.Real</em>) – The maximum number of items the iterator will yield.
+Defaults to infinity.</li>
+<li><strong>more_params</strong> – Parameters to the query, which will be added to
+<em>params</em>. See .call() for similar behaviour.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">A generator that probably contains dicts.</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Example usage:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">api</span><span class="o">.</span><span class="n">iterator</span><span class="p">(</span><span class="nb">list</span><span class="o">=</span><span class="s2">&quot;allpages&quot;</span><span class="p">,</span> <span class="n">apnamespace</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">aplimit</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="mi">3</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="nb">print</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+<span class="gp">...</span>
+<span class="go">{&#39;ns&#39;: 0, &#39;pageid&#39;: 5878274, &#39;title&#39;: &#39;!&#39;}</span>
+<span class="go">{&#39;ns&#39;: 0, &#39;pageid&#39;: 3632887, &#39;title&#39;: &#39;!!&#39;}</span>
+<span class="go">{&#39;ns&#39;: 0, &#39;pageid&#39;: 600744, &#39;title&#39;: &#39;!!!&#39;}</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="ceterach.api.MediaWiki.page">
+<code class="descname">page</code><span class="sig-paren">(</span><em>identity</em>, <em>follow_redirects=False</em><span class="sig-paren">)</span> &#x2192; ceterach.page.Page<a class="headerlink" href="#ceterach.api.MediaWiki.page" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a Page object for <em>identity</em>, which represents either a
+title or pageid.</p>
+<p>This method does not follow redirects, or check if the title is
+invalid. Those will be done when the Page’s attributes are loaded.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ceterach.api.MediaWiki.revision">
+<code class="descname">revision</code><span class="sig-paren">(</span><em>identity</em><span class="sig-paren">)</span> &#x2192; ceterach.revision.Revision<a class="headerlink" href="#ceterach.api.MediaWiki.revision" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a Revision object for <em>identity</em>, which represents the revid.</p>
+<p>This method does not check if the revid is valid. That will be done
+when the Revision’s attributes are loaded.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ceterach.api.MediaWiki.set_token">
+<code class="descname">set_token</code><span class="sig-paren">(</span><em>*args</em><span class="sig-paren">)</span><a class="headerlink" href="#ceterach.api.MediaWiki.set_token" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the Wiki’s <code class="docutils literal notranslate"><span class="pre">tokens</span></code> attribute with the tokens specified in
+the <em>args</em>.</p>
+<p>If <em>args</em> are not specified, they will default to <code class="docutils literal notranslate"><span class="pre">'edit'</span></code>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>args</strong> – Strings that represent token names</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ceterach.api.MediaWiki.tokens">
+<code class="descname">tokens</code><a class="headerlink" href="#ceterach.api.MediaWiki.tokens" title="Permalink to this definition">¶</a></dt>
+<dd><p>A mapping of the token name to the token.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ceterach.api.MediaWiki.user">
+<code class="descname">user</code><span class="sig-paren">(</span><em>identity</em><span class="sig-paren">)</span> &#x2192; ceterach.user.User<a class="headerlink" href="#ceterach.api.MediaWiki.user" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a User object for <em>identity</em>, which represents the username.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<span id="document-page"></span><div class="section" id="page-module">
+<h3>page module<a class="headerlink" href="#page-module" title="Permalink to this headline">¶</a></h3>
+<p>Ceterach is an interface for interacting with MediaWiki.</p>
+<span class="target" id="module-ceterach.page"></span><dl class="class">
+<dt id="ceterach.page.Page">
+<em class="property">class </em><code class="descclassname">ceterach.page.</code><code class="descname">Page</code><span class="sig-paren">(</span><em>api</em>, <em>title=''</em>, <em>pageid=0</em>, <em>follow_redirects=False</em><span class="sig-paren">)</span><a class="headerlink" href="#ceterach.page.Page" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>This represents a page on a wiki, and has attributes that ease the process
+of getting information about the page.</p>
+<dl class="method">
+<dt id="ceterach.page.Page.append">
+<code class="descname">append</code><span class="sig-paren">(</span><em>content</em>, <em>summary=''</em>, <em>minor=False</em>, <em>bot=False</em>, <em>force=False</em><span class="sig-paren">)</span><a class="headerlink" href="#ceterach.page.Page.append" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add <em>content</em> to the bottom of the page. <em>summary</em> is the edit
+summary used for the edit. The edit will be marked as minor if <em>minor</em>
+is True, and if <em>bot</em> is True and the logged-in user has the bot flag,
+it will also be marked as a bot edit.</p>
+<p>Set <em>force</em> to True in order to make the edit in spite of edit
+conflicts or nonexistence.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>content</strong> (<em>str</em>) – The text with which to append to the page’s original
+content.</li>
+<li><strong>summary</strong> (<em>str</em>) – The comment to use for the modification, also known as
+the edit summary.</li>
+<li><strong>minor</strong> (<em>bool</em>) – Mark the edit as minor, if set to True.</li>
+<li><strong>bot</strong> (<em>bool</em>) – Mark the edit as a bot edit, if the logged in user has the
+bot flag and the parameter is set to True.</li>
+<li><strong>force</strong> (<em>bool</em>) – If set to True, ignore edit conflicts and create the
+page if it doesn’t already exist.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">A dictionary containing the API query result.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ceterach.page.Page.categories">
+<code class="descname">categories</code><a class="headerlink" href="#ceterach.page.Page.categories" title="Permalink to this definition">¶</a></dt>
+<dd><p>A tuple containing the categories that the page can be found in.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ceterach.page.Page.content">
+<code class="descname">content</code><a class="headerlink" href="#ceterach.page.Page.content" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the page content, which is cached if you try to get this
+attribute again.</p>
+<p>If the page does not exist, the method raises a NonexistentPageError.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">The page content</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body">NonexistentPageError</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="ceterach.page.Page.create">
+<code class="descname">create</code><span class="sig-paren">(</span><em>content</em>, <em>summary=''</em>, <em>minor=False</em>, <em>bot=False</em>, <em>force=False</em><span class="sig-paren">)</span><a class="headerlink" href="#ceterach.page.Page.create" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create the page with <em>content</em> as the content. <em>summary</em> is the edit
+summary used for the edit. The edit will be marked as minor if <em>minor</em>
+is True, and if <em>bot</em> is True and the logged-in user has the bot flag,
+it will also be marked as a bot edit.</p>
+<p>Set <em>force</em> to True in order to make the edit in spite of edit
+conflicts.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>content</strong> (<em>str</em>) – The text with which to create the page.</li>
+<li><strong>summary</strong> (<em>str</em>) – The comment to use for the modification, also known as
+the edit summary.</li>
+<li><strong>minor</strong> (<em>bool</em>) – Mark the edit as minor, if set to True.</li>
+<li><strong>bot</strong> (<em>bool</em>) – Mark the edit as a bot edit, if the logged in user has the
+bot flag and the parameter is set to True.</li>
+<li><strong>force</strong> (<em>bool</em>) – If set to True, ignore edit conflicts and create the
+page if it doesn’t already exist.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">A dictionary containing the API query result.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="ceterach.page.Page.delete">
+<code class="descname">delete</code><span class="sig-paren">(</span><em>reason=''</em><span class="sig-paren">)</span><a class="headerlink" href="#ceterach.page.Page.delete" title="Permalink to this definition">¶</a></dt>
+<dd><p>Delete the page.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>reason</strong> (<em>str</em>) – The reason for the deletion.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A dictionary containing the API query result</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="ceterach.page.Page.edit">
+<code class="descname">edit</code><span class="sig-paren">(</span><em>content</em>, <em>summary=''</em>, <em>minor=False</em>, <em>bot=False</em>, <em>force=False</em><span class="sig-paren">)</span><a class="headerlink" href="#ceterach.page.Page.edit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Replace the page’s content with <em>content</em>. <em>summary</em> is the edit
+summary used for the edit. The edit will be marked as minor if <em>minor</em>
+is True, and if <em>bot</em> is True and the logged-in user has the bot flag,
+it will also be marked as a bot edit.</p>
+<p>Set <em>force</em> to True in order to make the edit in spite of edit
+conflicts and nonexistence.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>content</strong> (<em>str</em>) – The text with which to replace the page’s original
+content.</li>
+<li><strong>summary</strong> (<em>str</em>) – The comment to use for the modification, also known as
+the edit summary.</li>
+<li><strong>minor</strong> (<em>bool</em>) – Mark the edit as minor, if set to True.</li>
+<li><strong>bot</strong> (<em>bool</em>) – Mark the edit as a bot edit, if the logged in user has the
+bot flag and the parameter is set to True.</li>
+<li><strong>force</strong> (<em>bool</em>) – If set to True, ignore edit conflicts and create the
+page if it doesn’t already exist.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">A dictionary containing the API query result.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ceterach.page.Page.exists">
+<code class="descname">exists</code><a class="headerlink" href="#ceterach.page.Page.exists" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check the existence of the page.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">True if the page exists, False otherwise</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="ceterach.page.Page.from_revid">
+<code class="descname">from_revid</code><span class="sig-paren">(</span><em>revid</em><span class="sig-paren">)</span><a class="headerlink" href="#ceterach.page.Page.from_revid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a Page object by extracting information from the given revid.</p>
+<p>This method does not follow redirects, and the very process of calling
+the method makes an API query.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>revid</strong> (<em>int</em>) – The revision ID corresponding to the page being requested.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A page.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="ceterach.page.Page.get_redirect_target">
+<code class="descname">get_redirect_target</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ceterach.page.Page.get_redirect_target" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the Page object for the target this Page redirects to.</p>
+<p>If this Page doesn’t exist, or is invalid, it will
+raise a NonexistentPageError, or InvalidPageError respectively. If the
+page isn’t a redirect, it will raise a RedirectError.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Page object that represents the redirect target.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body">NonexistentPageError, InvalidPageError, RedirectError</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="ceterach.page.Page.identity">
+<code class="descname">identity</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#ceterach.page.Page.identity" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a <code class="docutils literal notranslate"><span class="pre">{key:</span> <span class="pre">value}</span></code> that can be used in API queries.</p>
+<p>It should probably return None or raise an exception if nothing useful
+could be found. One day, it will.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><code class="docutils literal notranslate"><span class="pre">{&quot;pageids&quot;:</span> <span class="pre">...}</span></code>, <code class="docutils literal notranslate"><span class="pre">{&quot;titles&quot;:</span> <span class="pre">...}</span></code>, or
+<code class="docutils literal notranslate"><span class="pre">{&quot;revids&quot;:</span> <span class="pre">...}</span></code></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ceterach.page.Page.is_redirect">
+<code class="descname">is_redirect</code><a class="headerlink" href="#ceterach.page.Page.is_redirect" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">True if the page is a redirect, False if the Page isn’t or
+doesn’t exist.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ceterach.page.Page.is_talkpage">
+<code class="descname">is_talkpage</code><a class="headerlink" href="#ceterach.page.Page.is_talkpage" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check if this page is in a talk namespace.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">True if the page is in a talk namespace, False otherwise</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="ceterach.page.Page.load_attributes">
+<code class="descname">load_attributes</code><span class="sig-paren">(</span><em>res=None</em><span class="sig-paren">)</span><a class="headerlink" href="#ceterach.page.Page.load_attributes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Call this to load <code class="docutils literal notranslate"><span class="pre">self.__title</span></code>, <code class="docutils literal notranslate"><span class="pre">._is_redirect</span></code>, <code class="docutils literal notranslate"><span class="pre">._pageid</span></code>,
+<code class="docutils literal notranslate"><span class="pre">._exists</span></code>, <code class="docutils literal notranslate"><span class="pre">._namespace</span></code>, <code class="docutils literal notranslate"><span class="pre">._creator</span></code>, and <code class="docutils literal notranslate"><span class="pre">._revid</span></code>.</p>
+<p>This method also resolves redirects if <code class="docutils literal notranslate"><span class="pre">follow_redirects=True</span></code> was
+passed to the constructor. If the page is a redirect, the method will
+make a grand total of 2 API queries.</p>
+<p>If the <em>res</em> parameter was supplied, the method will pretend that
+was what the first query returned. As such, if redirects are followed,
+a single API query will be made.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>res</strong> (<em>dict</em>) – The result of an earlier API request (optional). If you
+are planning to set this parameter to a
+value other than None, the minimal API request parameters
+needed for this method to function
+correctly are: <code class="docutils literal notranslate"><span class="pre">{'inprop':</span> <span class="pre">'protection',</span>
+<span class="pre">'prop':</span> <span class="pre">('info',</span> <span class="pre">'revisions',</span> <span class="pre">'categories'),</span>
+<span class="pre">'rvprop':</span> <span class="pre">('user',</span> <span class="pre">'content')}</span></code></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="ceterach.page.Page.load_revisions">
+<code class="descname">load_revisions</code><span class="sig-paren">(</span><em>num=inf</em><span class="sig-paren">)</span><a class="headerlink" href="#ceterach.page.Page.load_revisions" title="Permalink to this definition">¶</a></dt>
+<dd><p>Call this to populate self.revisions. Specify the <em>num</em> parameter
+to limit it to <em>num</em> revisions, in reverse chronological order.</p>
+<p>The revision at index <em>n</em> will be closer to the current day than the
+revision at index <em>n+1</em>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ceterach.page.Page.move">
+<code class="descname">move</code><span class="sig-paren">(</span><em>target</em>, <em>reason</em>, <em>talk=False</em>, <em>subpages=False</em>, <em>redirect=True</em><span class="sig-paren">)</span><a class="headerlink" href="#ceterach.page.Page.move" title="Permalink to this definition">¶</a></dt>
+<dd><p>Move the page to a new title, <em>target</em>.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>target</strong> (<em>str</em>) – Title you want to rename the page to.</li>
+<li><strong>reason</strong> (<em>str</em>) – The reason for the move.</li>
+<li><strong>talk</strong> (<em>bool</em>) – Move the talk page too, if set to True.</li>
+<li><strong>subpages</strong> (<em>bool</em>) – Move subpages too, if set to True.</li>
+<li><strong>redirect</strong> (<em>bool</em>) – Leave a redirect behind, if set to True.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">A dictionary containing the API query result.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ceterach.page.Page.namespace">
+<code class="descname">namespace</code><a class="headerlink" href="#ceterach.page.Page.namespace" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">An integer representing the Page’s namespace.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ceterach.page.Page.pageid">
+<code class="descname">pageid</code><a class="headerlink" href="#ceterach.page.Page.pageid" title="Permalink to this definition">¶</a></dt>
+<dd><p>An integer ID representing the page.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">The page’s ID.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="ceterach.page.Page.prepend">
+<code class="descname">prepend</code><span class="sig-paren">(</span><em>content</em>, <em>summary=''</em>, <em>minor=False</em>, <em>bot=False</em>, <em>force=False</em><span class="sig-paren">)</span><a class="headerlink" href="#ceterach.page.Page.prepend" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add <em>content</em> to the top of the page. <em>summary</em> is the edit
+summary used for the edit. The edit will be marked as minor if <em>minor</em>
+is True, and if <em>bot</em> is True and the logged-in user has the bot flag,
+it will also be marked as a bot edit.</p>
+<p>Set <em>force</em> to True in order to make the edit in spite of edit
+conflicts or nonexistence.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>content</strong> (<em>str</em>) – The text with which to prepend to the page’s original
+content.</li>
+<li><strong>summary</strong> (<em>str</em>) – The comment to use for the modification, also known as
+the edit summary.</li>
+<li><strong>minor</strong> (<em>bool</em>) – Mark the edit as minor, if set to True.</li>
+<li><strong>bot</strong> (<em>bool</em>) – Mark the edit as a bot edit, if the logged in user has the
+bot flag and the parameter is set to True.</li>
+<li><strong>force</strong> (<em>bool</em>) – If set to True, ignore edit conflicts and create the
+page if it doesn’t already exist.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">A dictionary containing the API query result.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ceterach.page.Page.protection">
+<code class="descname">protection</code><a class="headerlink" href="#ceterach.page.Page.protection" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the protection levels on the page.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">A dict representing the page’s protection level. The keys
+are, by default, ‘edit’, ‘create’, and ‘move’. If the wiki
+is configured to have other protection types, those types
+will also be included in the keys. The values can be
+<code class="docutils literal notranslate"><span class="pre">(None,</span> <span class="pre">None)</span></code> (no restriction for that action) or
+<code class="docutils literal notranslate"><span class="pre">(level,</span> <span class="pre">expiry)</span></code>:<ul class="simple">
+<li><code class="docutils literal notranslate"><span class="pre">level</span></code> is the userright needed to perform the action
+(<code class="docutils literal notranslate"><span class="pre">&quot;autoconfirmed&quot;</span></code>, for example)</li>
+<li><code class="docutils literal notranslate"><span class="pre">expiry</span></code> is the expiration time of the restriction. This
+will either be None, or a datetime at which the protection
+will expire.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ceterach.page.Page.revid">
+<code class="descname">revid</code><a class="headerlink" href="#ceterach.page.Page.revid" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">An integer representing the Page’s current revision ID.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ceterach.page.Page.revision_user">
+<code class="descname">revision_user</code><a class="headerlink" href="#ceterach.page.Page.revision_user" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the last user to edit the page.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">A User object</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body">NonexistentPageError, if the page doesn’t exist or is invalid.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ceterach.page.Page.revisions">
+<code class="descname">revisions</code><a class="headerlink" href="#ceterach.page.Page.revisions" title="Permalink to this definition">¶</a></dt>
+<dd><p>A tuple containing the page’s revisions, from newest to oldest.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ceterach.page.Page.title">
+<code class="descname">title</code><a class="headerlink" href="#ceterach.page.Page.title" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the page’s title. If self.load_attributes() was not called
+prior to the execution of this method, the result will be equal to the
+<em>title</em> parameter passed to the constructor. Otherwise, it will be
+normalised.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">The page’s title.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="ceterach.page.Page.toggle_talk">
+<code class="descname">toggle_talk</code><span class="sig-paren">(</span><em>follow_redirects=None</em><span class="sig-paren">)</span><a class="headerlink" href="#ceterach.page.Page.toggle_talk" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a page with its namespace switched to or from the talk
+namespace.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>follow_redirects</strong> (<em>bool</em>) – If set to anything other than None (the
+default), this will be passed to the new Page
+object’s constructor. Otherwise, it will be
+set to the one passed to its own constructor.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">The page that’s either the talk or non-talk version of the
+current page.</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Raises:</th><td class="field-body">exc.InvalidPageError</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="ceterach.page.Page.undelete">
+<code class="descname">undelete</code><span class="sig-paren">(</span><em>reason=''</em><span class="sig-paren">)</span><a class="headerlink" href="#ceterach.page.Page.undelete" title="Permalink to this definition">¶</a></dt>
+<dd><p>Undelete the page.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>reason</strong> (<em>str</em>) – The reason for the undeletion.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A dictionary containing the API query result</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<span id="document-user"></span><div class="section" id="user-module">
+<h3>user module<a class="headerlink" href="#user-module" title="Permalink to this headline">¶</a></h3>
+<p>Ceterach is an interface for interacting with MediaWiki.</p>
+<span class="target" id="module-ceterach.user"></span><dl class="class">
+<dt id="ceterach.user.User">
+<em class="property">class </em><code class="descclassname">ceterach.user.</code><code class="descname">User</code><span class="sig-paren">(</span><em>api</em>, <em>name</em><span class="sig-paren">)</span><a class="headerlink" href="#ceterach.user.User" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="attribute">
+<dt id="ceterach.user.User.blockinfo">
+<code class="descname">blockinfo</code><a class="headerlink" href="#ceterach.user.User.blockinfo" title="Permalink to this definition">¶</a></dt>
+<dd><p>Information on the user’s current block status.</p>
+<p>This will always return a dict with the keys <code class="docutils literal notranslate"><span class="pre">{'by',</span> <span class="pre">'reason',</span>
+<span class="pre">'expiry'}</span></code>. If the user is not currently blocked, all the values
+will be <code class="docutils literal notranslate"><span class="pre">None</span></code>.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ceterach.user.User.create">
+<code class="descname">create</code><span class="sig-paren">(</span><em>password</em>, <em>email=''</em>, <em>realname=''</em>, <em>logout=True</em><span class="sig-paren">)</span><a class="headerlink" href="#ceterach.user.User.create" title="Permalink to this definition">¶</a></dt>
+<dd><p>Try to create a new account on the wiki with the already-specified
+username.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>password</strong> (<em>str</em>) – the password that the new account should have.</li>
+<li><strong>email</strong> (<em>str</em>) – the email address that the new account should be
+associated with.</li>
+<li><strong>realname</strong> (<em>str</em>) – the real name that the new account should be
+associated with.</li>
+<li><strong>logout</strong> (<em>bool</em>) – whether to log the user out right after creating it.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ceterach.user.User.editcount">
+<code class="descname">editcount</code><a class="headerlink" href="#ceterach.user.User.editcount" title="Permalink to this definition">¶</a></dt>
+<dd><p>The number of edits this user has made.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ceterach.user.User.email">
+<code class="descname">email</code><span class="sig-paren">(</span><em>subject</em>, <em>text</em>, <em>cc=True</em><span class="sig-paren">)</span><a class="headerlink" href="#ceterach.user.User.email" title="Permalink to this definition">¶</a></dt>
+<dd><p>Send an email to the user.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>subject</strong> (<em>str</em>) – sSubject of the email</li>
+<li><strong>text</strong> (<em>str</em>) – (plain text) content of the email.</li>
+<li><strong>cc</strong> (<em>bool</em>) – Whether you wish to send yourself a copy of the email.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">The result of the API query.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ceterach.user.User.exists">
+<code class="descname">exists</code><a class="headerlink" href="#ceterach.user.User.exists" title="Permalink to this definition">¶</a></dt>
+<dd><p>Whether this user account exists.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ceterach.user.User.gender">
+<code class="descname">gender</code><a class="headerlink" href="#ceterach.user.User.gender" title="Permalink to this definition">¶</a></dt>
+<dd><p>The gender of the user.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ceterach.user.User.groups">
+<code class="descname">groups</code><a class="headerlink" href="#ceterach.user.User.groups" title="Permalink to this definition">¶</a></dt>
+<dd><p>The user groups that this user is in. This is different from the
+user rights that this user has, which can be obtained with
+<code class="docutils literal notranslate"><span class="pre">.rights</span></code>.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ceterach.user.User.is_emailable">
+<code class="descname">is_emailable</code><a class="headerlink" href="#ceterach.user.User.is_emailable" title="Permalink to this definition">¶</a></dt>
+<dd><p>Whether this user can be emailed.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ceterach.user.User.is_ip">
+<code class="descname">is_ip</code><a class="headerlink" href="#ceterach.user.User.is_ip" title="Permalink to this definition">¶</a></dt>
+<dd><p>Whether this user is an IP user.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ceterach.user.User.load_attributes">
+<code class="descname">load_attributes</code><span class="sig-paren">(</span><em>res=None</em><span class="sig-paren">)</span><a class="headerlink" href="#ceterach.user.User.load_attributes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Call this to load <code class="docutils literal notranslate"><span class="pre">self.__title</span></code>, <code class="docutils literal notranslate"><span class="pre">._is_redirect</span></code>, <code class="docutils literal notranslate"><span class="pre">._pageid</span></code>,
+<code class="docutils literal notranslate"><span class="pre">._exists</span></code>, <code class="docutils literal notranslate"><span class="pre">._namespace</span></code>, <code class="docutils literal notranslate"><span class="pre">._creator</span></code>, and <code class="docutils literal notranslate"><span class="pre">._revid</span></code>.</p>
+<p>This method also resolves redirects if <code class="docutils literal notranslate"><span class="pre">follow_redirects=True</span></code> was
+passed to the constructor. If the page is a redirect, the method will
+make a grand total of 2 API queries.</p>
+<p>If the <em>res</em> parameter was supplied, the method will pretend that
+was what the first query returned. As such, if redirects are followed,
+a single API query will be made.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>res</strong> (<em>dict</em>) – The result of an earlier API request (optional). If you
+are planning to set this parameter to a
+value other than None, the minimal API request parameters
+needed for this method to function
+correctly are: <code class="docutils literal notranslate"><span class="pre">{'usprop':</span> <span class="pre">('blockinfo',</span> <span class="pre">'groups',</span>
+<span class="pre">'rights',</span> <span class="pre">'editcount',</span> <span class="pre">'registration',</span> <span class="pre">'emailable',</span>
+<span class="pre">'gender'),</span> <span class="pre">'list':</span> <span class="pre">'users'}</span></code></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ceterach.user.User.name">
+<code class="descname">name</code><a class="headerlink" href="#ceterach.user.User.name" title="Permalink to this definition">¶</a></dt>
+<dd><p>The displayed username or IP address of this user.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ceterach.user.User.registration">
+<code class="descname">registration</code><a class="headerlink" href="#ceterach.user.User.registration" title="Permalink to this definition">¶</a></dt>
+<dd><p>The time that this user registered at.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ceterach.user.User.rights">
+<code class="descname">rights</code><a class="headerlink" href="#ceterach.user.User.rights" title="Permalink to this definition">¶</a></dt>
+<dd><p>The user rights that this user has. This is different from the
+user groups that this user is in, which can be obtained with
+<code class="docutils literal notranslate"><span class="pre">.groups</span></code>.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ceterach.user.User.userid">
+<code class="descname">userid</code><a class="headerlink" href="#ceterach.user.User.userid" title="Permalink to this definition">¶</a></dt>
+<dd><p>This user’s user id, for internal MediaWiki use.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ceterach.user.User.userpage">
+<code class="descname">userpage</code><a class="headerlink" href="#ceterach.user.User.userpage" title="Permalink to this definition">¶</a></dt>
+<dd><p>A Page object that represents this user’s userpage.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<span id="document-revision"></span><div class="section" id="revision-module">
+<h3>revision module<a class="headerlink" href="#revision-module" title="Permalink to this headline">¶</a></h3>
+<p>Ceterach is an interface for interacting with MediaWiki.</p>
+<span class="target" id="module-ceterach.revision"></span><dl class="class">
+<dt id="ceterach.revision.Revision">
+<em class="property">class </em><code class="descclassname">ceterach.revision.</code><code class="descname">Revision</code><span class="sig-paren">(</span><em>api</em>, <em>revid</em><span class="sig-paren">)</span><a class="headerlink" href="#ceterach.revision.Revision" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="attribute">
+<dt id="ceterach.revision.Revision.content">
+<code class="descname">content</code><a class="headerlink" href="#ceterach.revision.Revision.content" title="Permalink to this definition">¶</a></dt>
+<dd><p>The content of the page described by this revision.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ceterach.revision.Revision.is_deleted">
+<code class="descname">is_deleted</code><a class="headerlink" href="#ceterach.revision.Revision.is_deleted" title="Permalink to this definition">¶</a></dt>
+<dd><p>True if the revision is deleted, otherwise False.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ceterach.revision.Revision.is_minor">
+<code class="descname">is_minor</code><a class="headerlink" href="#ceterach.revision.Revision.is_minor" title="Permalink to this definition">¶</a></dt>
+<dd><p>True if this revision was a minor edit, otherwise False.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ceterach.revision.Revision.load_attributes">
+<code class="descname">load_attributes</code><span class="sig-paren">(</span><em>res=None</em><span class="sig-paren">)</span><a class="headerlink" href="#ceterach.revision.Revision.load_attributes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ceterach.revision.Revision.page">
+<code class="descname">page</code><a class="headerlink" href="#ceterach.revision.Revision.page" title="Permalink to this definition">¶</a></dt>
+<dd><p>The page to which this revision was made.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ceterach.revision.Revision.prev_revision">
+<code class="descname">prev_revision</code><a class="headerlink" href="#ceterach.revision.Revision.prev_revision" title="Permalink to this definition">¶</a></dt>
+<dd><p>The revision made before this one, which was made to the same
+page.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ceterach.revision.Revision.restore">
+<code class="descname">restore</code><span class="sig-paren">(</span><em>summary=''</em>, <em>minor=False</em>, <em>bot=True</em>, <em>force=False</em><span class="sig-paren">)</span><a class="headerlink" href="#ceterach.revision.Revision.restore" title="Permalink to this definition">¶</a></dt>
+<dd><p>Replace the page’s content with the content found in this revision.
+<em>summary</em> is the edit summary used for the edit. The edit will be
+marked as minor if <em>minor</em> is True, and if <em>bot</em> is True and the
+logged-in user has the bot flag, it will also be marked as a bot
+edit.</p>
+<p>Set <em>force</em> to True in order to make the edit in spite of edit
+conflicts and nonexistence.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>summary</strong> (<em>str</em>) – The comment to use for the modification, also known as
+the edit summary.</li>
+<li><strong>minor</strong> (<em>bool</em>) – Mark the edit as minor, if set to True.</li>
+<li><strong>bot</strong> (<em>bool</em>) – Mark the edit as a bot edit, if the logged in user has the
+bot flag and the parameter is set to True.</li>
+<li><strong>force</strong> (<em>bool</em>) – If set to True, ignore edit conflicts and create the
+page if it doesn’t already exist.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">A dictionary containing the API query result.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ceterach.revision.Revision.revid">
+<code class="descname">revid</code><a class="headerlink" href="#ceterach.revision.Revision.revid" title="Permalink to this definition">¶</a></dt>
+<dd><p>The revision id of the revision.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ceterach.revision.Revision.rollback">
+<code class="descname">rollback</code><span class="sig-paren">(</span><em>summary=''</em>, <em>bot=False</em><span class="sig-paren">)</span><a class="headerlink" href="#ceterach.revision.Revision.rollback" title="Permalink to this definition">¶</a></dt>
+<dd><p>Undo edits in reverse chronological order, and stop when the edit
+about to be undone is made by a user different from the one who had
+most recently edited the page.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>summary</strong> (<em>str</em>) – The edit summary to revert the edits.</li>
+<li><strong>bot</strong> (<em>bool</em>) – If set to true, mark the edit as a bot edit, if the user
+has the bot flag.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">A dictionary containing the API query result.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ceterach.revision.Revision.rvtoken">
+<code class="descname">rvtoken</code><a class="headerlink" href="#ceterach.revision.Revision.rvtoken" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="ceterach.revision.Revision.summary">
+<code class="descname">summary</code><a class="headerlink" href="#ceterach.revision.Revision.summary" title="Permalink to this definition">¶</a></dt>
+<dd><p>The edit summary that describes this revision.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ceterach.revision.Revision.timestamp">
+<code class="descname">timestamp</code><a class="headerlink" href="#ceterach.revision.Revision.timestamp" title="Permalink to this definition">¶</a></dt>
+<dd><p>The time at which this revision was made.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ceterach.revision.Revision.user">
+<code class="descname">user</code><a class="headerlink" href="#ceterach.revision.Revision.user" title="Permalink to this definition">¶</a></dt>
+<dd><p>The user who made this revision.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="ceterach.revision.decorate">
+<code class="descclassname">ceterach.revision.</code><code class="descname">decorate</code><span class="sig-paren">(</span><em>meth</em><span class="sig-paren">)</span><a class="headerlink" href="#ceterach.revision.decorate" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<span id="document-file"></span><div class="section" id="file-module">
+<h3>file module<a class="headerlink" href="#file-module" title="Permalink to this headline">¶</a></h3>
+<p>Ceterach is an interface for interacting with MediaWiki.</p>
+<span class="target" id="module-ceterach.file"></span><dl class="class">
+<dt id="ceterach.file.File">
+<em class="property">class </em><code class="descclassname">ceterach.file.</code><code class="descname">File</code><span class="sig-paren">(</span><em>api</em>, <em>title=''</em>, <em>pageid=0</em>, <em>follow_redirects=False</em><span class="sig-paren">)</span><a class="headerlink" href="#ceterach.file.File" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="index.html#ceterach.page.Page" title="ceterach.page.Page"><code class="xref py py-class docutils literal notranslate"><span class="pre">ceterach.page.Page</span></code></a></p>
+<dl class="attribute">
+<dt id="ceterach.file.File.dimensions">
+<code class="descname">dimensions</code><a class="headerlink" href="#ceterach.file.File.dimensions" title="Permalink to this definition">¶</a></dt>
+<dd><p>A tuple of integers, in the format of <code class="docutils literal notranslate"><span class="pre">(width,</span> <span class="pre">height)</span></code>.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ceterach.file.File.hash">
+<code class="descname">hash</code><a class="headerlink" href="#ceterach.file.File.hash" title="Permalink to this definition">¶</a></dt>
+<dd><p>The SHA1 hash of the file content.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ceterach.file.File.load_attributes">
+<code class="descname">load_attributes</code><span class="sig-paren">(</span><em>res=None</em><span class="sig-paren">)</span><a class="headerlink" href="#ceterach.file.File.load_attributes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Call this to load <code class="docutils literal notranslate"><span class="pre">self.__title</span></code>, <code class="docutils literal notranslate"><span class="pre">._is_redirect</span></code>, <code class="docutils literal notranslate"><span class="pre">._pageid</span></code>,
+<code class="docutils literal notranslate"><span class="pre">._exists</span></code>, <code class="docutils literal notranslate"><span class="pre">._namespace</span></code>, <code class="docutils literal notranslate"><span class="pre">._creator</span></code>, and <code class="docutils literal notranslate"><span class="pre">._revid</span></code>.</p>
+<p>This method also resolves redirects if <code class="docutils literal notranslate"><span class="pre">follow_redirects=True</span></code> was
+passed to the constructor. If the page is a redirect, the method will
+make a grand total of 2 API queries.</p>
+<p>If the <em>res</em> parameter was supplied, the method will pretend that
+was what the first query returned. As such, if redirects are followed,
+a single API query will be made.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>res</strong> (<em>dict</em>) – The result of an earlier API request (optional). If you
+are planning to set this parameter to a
+value other than None, the minimal API request parameters
+needed for this method to function
+correctly are: <code class="docutils literal notranslate"><span class="pre">{'inprop':</span> <span class="pre">'protection',</span>
+<span class="pre">'prop':</span> <span class="pre">('info',</span> <span class="pre">'revisions',</span> <span class="pre">'categories'),</span>
+<span class="pre">'rvprop':</span> <span class="pre">('user',</span> <span class="pre">'content')}</span></code></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ceterach.file.File.mime">
+<code class="descname">mime</code><a class="headerlink" href="#ceterach.file.File.mime" title="Permalink to this definition">¶</a></dt>
+<dd><p>The mime type of the file.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ceterach.file.File.size">
+<code class="descname">size</code><a class="headerlink" href="#ceterach.file.File.size" title="Permalink to this definition">¶</a></dt>
+<dd><p>The file size in bytes.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ceterach.file.File.upload">
+<code class="descname">upload</code><span class="sig-paren">(</span><em>fileobj</em>, <em>text</em>, <em>summary</em>, <em>watch=False</em>, <em>key=''</em><span class="sig-paren">)</span><a class="headerlink" href="#ceterach.file.File.upload" title="Permalink to this definition">¶</a></dt>
+<dd><p>Upload an arbitrary file object to this file page.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>fileobj</strong> (<em>file</em>) – The file that will be uploaded.</li>
+<li><strong>text</strong> (<em>str</em>) – The description page for the file page.</li>
+<li><strong>summary</strong> (<em>str</em>) – The upload summary to be used.</li>
+<li><strong>watch</strong> (<em>bool</em>) – Set this to True in order to put this page on the
+watchlist when this file is uploaded, otherwise False.</li>
+<li><strong>key</strong> (<em>str</em>) – Session key returned by a previous upload that failed due to warnings.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ceterach.file.File.uploader">
+<code class="descname">uploader</code><a class="headerlink" href="#ceterach.file.File.uploader" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">A User object representing the user who uploaded the most
+recent revision of the file.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="ceterach.file.File.url">
+<code class="descname">url</code><span class="sig-paren">(</span><em>width=None</em>, <em>height=None</em><span class="sig-paren">)</span> &#x2192; str<a class="headerlink" href="#ceterach.file.File.url" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a direct link to the file.</p>
+<p>You may specify either the width or the height, but not both.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>width</strong> (<em>int</em>) – The desired width of the image.</li>
+<li><strong>height</strong> (<em>int</em>) – The desired height of the image.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<span id="document-category"></span><div class="section" id="category-module">
+<h3>category module<a class="headerlink" href="#category-module" title="Permalink to this headline">¶</a></h3>
+<p>Ceterach is an interface for interacting with MediaWiki.</p>
+<span class="target" id="module-ceterach.category"></span><dl class="class">
+<dt id="ceterach.category.Category">
+<em class="property">class </em><code class="descclassname">ceterach.category.</code><code class="descname">Category</code><span class="sig-paren">(</span><em>api</em>, <em>title=''</em>, <em>pageid=0</em>, <em>follow_redirects=False</em><span class="sig-paren">)</span><a class="headerlink" href="#ceterach.category.Category" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="index.html#ceterach.page.Page" title="ceterach.page.Page"><code class="xref py py-class docutils literal notranslate"><span class="pre">ceterach.page.Page</span></code></a></p>
+<dl class="method">
+<dt id="ceterach.category.Category.load_attributes">
+<code class="descname">load_attributes</code><span class="sig-paren">(</span><em>res=None</em><span class="sig-paren">)</span><a class="headerlink" href="#ceterach.category.Category.load_attributes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Call this to load <code class="docutils literal notranslate"><span class="pre">self.__title</span></code>, <code class="docutils literal notranslate"><span class="pre">._is_redirect</span></code>, <code class="docutils literal notranslate"><span class="pre">._pageid</span></code>,
+<code class="docutils literal notranslate"><span class="pre">._exists</span></code>, <code class="docutils literal notranslate"><span class="pre">._namespace</span></code>, <code class="docutils literal notranslate"><span class="pre">._creator</span></code>, and <code class="docutils literal notranslate"><span class="pre">._revid</span></code>.</p>
+<p>This method also resolves redirects if <code class="docutils literal notranslate"><span class="pre">follow_redirects=True</span></code> was
+passed to the constructor. If the page is a redirect, the method will
+make a grand total of 2 API queries.</p>
+<p>If the <em>res</em> parameter was supplied, the method will pretend that
+was what the first query returned. As such, if redirects are followed,
+a single API query will be made.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>res</strong> (<em>dict</em>) – The result of an earlier API request (optional). If you
+are planning to set this parameter to a
+value other than None, the minimal API request parameters
+needed for this method to function
+correctly are: <code class="docutils literal notranslate"><span class="pre">{'inprop':</span> <span class="pre">'protection',</span>
+<span class="pre">'prop':</span> <span class="pre">('info',</span> <span class="pre">'revisions',</span> <span class="pre">'categories'),</span>
+<span class="pre">'rvprop':</span> <span class="pre">('user',</span> <span class="pre">'content')}</span></code></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ceterach.category.Category.members">
+<code class="descname">members</code><a class="headerlink" href="#ceterach.category.Category.members" title="Permalink to this definition">¶</a></dt>
+<dd><p>Iterate over Pages in the category.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ceterach.category.Category.populate">
+<code class="descname">populate</code><span class="sig-paren">(</span><em>res=None</em><span class="sig-paren">)</span><a class="headerlink" href="#ceterach.category.Category.populate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the pages that are contained by this category, and
+subcategories. This data is stored in <code class="docutils literal notranslate"><span class="pre">._members</span></code> and <code class="docutils literal notranslate"><span class="pre">._subcats</span></code>.</p>
+<p>If the <em>res</em> parameter was supplied, the method will pretend that
+was what the query returned.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>res</strong> (<em>list</em>) – The result of an earlier API request (optional). If you
+are planning to set this parameter to a value
+other than None, the minimal API request parameters to
+correctly form this are: <code class="docutils literal notranslate"><span class="pre">{&quot;prop&quot;:</span> <span class="pre">('revisions',</span> <span class="pre">'info'),</span>
+<span class="pre">&quot;gcmtitle&quot;:</span> <span class="pre">category_title,</span>
+<span class="pre">&quot;generator&quot;:</span> <span class="pre">&quot;categorymembers&quot;,</span>
+<span class="pre">&quot;rvprop&quot;:</span> <span class="pre">'content'}</span></code></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ceterach.category.Category.subcats">
+<code class="descname">subcats</code><a class="headerlink" href="#ceterach.category.Category.subcats" title="Permalink to this definition">¶</a></dt>
+<dd><p>Iterate over Categories in the category.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<span id="document-exceptions"></span><div class="section" id="exceptions-module">
+<h3>exceptions module<a class="headerlink" href="#exceptions-module" title="Permalink to this headline">¶</a></h3>
+<p>Ceterach is an interface for interacting with MediaWiki.</p>
+<span class="target" id="module-ceterach.exceptions"></span><dl class="exception">
+<dt id="ceterach.exceptions.ApiError">
+<em class="property">exception </em><code class="descclassname">ceterach.exceptions.</code><code class="descname">ApiError</code><span class="sig-paren">(</span><em>message</em>, <em>code=None</em><span class="sig-paren">)</span><a class="headerlink" href="#ceterach.exceptions.ApiError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#ceterach.exceptions.CeterachError" title="ceterach.exceptions.CeterachError"><code class="xref py py-class docutils literal notranslate"><span class="pre">ceterach.exceptions.CeterachError</span></code></a></p>
+<p>Could not connect to the API and process the response correctly.
+Perhaps the URL was malformed, the site does not exist, the API does not
+support format=json, or the internet connection died.</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="ceterach.exceptions.CeterachError">
+<em class="property">exception </em><code class="descclassname">ceterach.exceptions.</code><code class="descname">CeterachError</code><span class="sig-paren">(</span><em>message</em>, <em>code=None</em><span class="sig-paren">)</span><a class="headerlink" href="#ceterach.exceptions.CeterachError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></p>
+<p>This is the base exception class for exceptions in Ceterach.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>message</strong> – The message, stored in <code class="docutils literal notranslate"><span class="pre">self.msg</span></code></li>
+<li><strong>code</strong> – The error code, stored in <code class="docutils literal notranslate"><span class="pre">self.code</span></code></li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="attribute">
+<dt id="ceterach.exceptions.CeterachError.code">
+<code class="descname">code</code><em class="property"> = 'py'</em><a class="headerlink" href="#ceterach.exceptions.CeterachError.code" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="exception">
+<dt id="ceterach.exceptions.EditConflictError">
+<em class="property">exception </em><code class="descclassname">ceterach.exceptions.</code><code class="descname">EditConflictError</code><span class="sig-paren">(</span><em>message</em>, <em>code=None</em><span class="sig-paren">)</span><a class="headerlink" href="#ceterach.exceptions.EditConflictError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#ceterach.exceptions.EditError" title="ceterach.exceptions.EditError"><code class="xref py py-class docutils literal notranslate"><span class="pre">ceterach.exceptions.EditError</span></code></a></p>
+<p>You got an edit conflict while editing a page.</p>
+<p>This exception will also be raised in the case of delete/recreate conflicts.</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="ceterach.exceptions.EditError">
+<em class="property">exception </em><code class="descclassname">ceterach.exceptions.</code><code class="descname">EditError</code><span class="sig-paren">(</span><em>message</em>, <em>code=None</em><span class="sig-paren">)</span><a class="headerlink" href="#ceterach.exceptions.EditError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#ceterach.exceptions.CeterachError" title="ceterach.exceptions.CeterachError"><code class="xref py py-class docutils literal notranslate"><span class="pre">ceterach.exceptions.CeterachError</span></code></a></p>
+<p>An error occurred while editing or doing something else that ‘wrote’
+to the API.</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="ceterach.exceptions.EditFilterError">
+<em class="property">exception </em><code class="descclassname">ceterach.exceptions.</code><code class="descname">EditFilterError</code><span class="sig-paren">(</span><em>message</em>, <em>code=None</em><span class="sig-paren">)</span><a class="headerlink" href="#ceterach.exceptions.EditFilterError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#ceterach.exceptions.FilterError" title="ceterach.exceptions.FilterError"><code class="xref py py-class docutils literal notranslate"><span class="pre">ceterach.exceptions.FilterError</span></code></a></p>
+<p>MediaWiki edit filter blocked the edit.</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="ceterach.exceptions.FilterError">
+<em class="property">exception </em><code class="descclassname">ceterach.exceptions.</code><code class="descname">FilterError</code><span class="sig-paren">(</span><em>message</em>, <em>code=None</em><span class="sig-paren">)</span><a class="headerlink" href="#ceterach.exceptions.FilterError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#ceterach.exceptions.EditError" title="ceterach.exceptions.EditError"><code class="xref py py-class docutils literal notranslate"><span class="pre">ceterach.exceptions.EditError</span></code></a></p>
+<p>Base class for edits that are blocked by filters and blacklists.</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="ceterach.exceptions.InvalidPageError">
+<em class="property">exception </em><code class="descclassname">ceterach.exceptions.</code><code class="descname">InvalidPageError</code><span class="sig-paren">(</span><em>message</em>, <em>code=None</em><span class="sig-paren">)</span><a class="headerlink" href="#ceterach.exceptions.InvalidPageError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#ceterach.exceptions.CeterachError" title="ceterach.exceptions.CeterachError"><code class="xref py py-class docutils literal notranslate"><span class="pre">ceterach.exceptions.CeterachError</span></code></a></p>
+<p>Attempted to get information about a page whose title is invalid.</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="ceterach.exceptions.NonexistentPageError">
+<em class="property">exception </em><code class="descclassname">ceterach.exceptions.</code><code class="descname">NonexistentPageError</code><span class="sig-paren">(</span><em>message</em>, <em>code=None</em><span class="sig-paren">)</span><a class="headerlink" href="#ceterach.exceptions.NonexistentPageError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#ceterach.exceptions.CeterachError" title="ceterach.exceptions.CeterachError"><code class="xref py py-class docutils literal notranslate"><span class="pre">ceterach.exceptions.CeterachError</span></code></a></p>
+<p>Attempted to get information about a page that does not exist.</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="ceterach.exceptions.NonexistentRevisionError">
+<em class="property">exception </em><code class="descclassname">ceterach.exceptions.</code><code class="descname">NonexistentRevisionError</code><span class="sig-paren">(</span><em>message</em>, <em>code=None</em><span class="sig-paren">)</span><a class="headerlink" href="#ceterach.exceptions.NonexistentRevisionError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#ceterach.exceptions.CeterachError" title="ceterach.exceptions.CeterachError"><code class="xref py py-class docutils literal notranslate"><span class="pre">ceterach.exceptions.CeterachError</span></code></a></p>
+<p>Attempted to get information about a revision that does not exist.</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="ceterach.exceptions.NonexistentUserError">
+<em class="property">exception </em><code class="descclassname">ceterach.exceptions.</code><code class="descname">NonexistentUserError</code><span class="sig-paren">(</span><em>message</em>, <em>code=None</em><span class="sig-paren">)</span><a class="headerlink" href="#ceterach.exceptions.NonexistentUserError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#ceterach.exceptions.CeterachError" title="ceterach.exceptions.CeterachError"><code class="xref py py-class docutils literal notranslate"><span class="pre">ceterach.exceptions.CeterachError</span></code></a></p>
+<p>Attempted to get information about a user that does not exist.</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="ceterach.exceptions.PermissionsError">
+<em class="property">exception </em><code class="descclassname">ceterach.exceptions.</code><code class="descname">PermissionsError</code><span class="sig-paren">(</span><em>message</em>, <em>code=None</em><span class="sig-paren">)</span><a class="headerlink" href="#ceterach.exceptions.PermissionsError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#ceterach.exceptions.EditError" title="ceterach.exceptions.EditError"><code class="xref py py-class docutils literal notranslate"><span class="pre">ceterach.exceptions.EditError</span></code></a></p>
+<p>Attempted to do something that requires rights you don’t have.
+For instance, a non-admin tried to edit a full-protected page.</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="ceterach.exceptions.RedirectError">
+<em class="property">exception </em><code class="descclassname">ceterach.exceptions.</code><code class="descname">RedirectError</code><span class="sig-paren">(</span><em>message</em>, <em>code=None</em><span class="sig-paren">)</span><a class="headerlink" href="#ceterach.exceptions.RedirectError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#ceterach.exceptions.CeterachError" title="ceterach.exceptions.CeterachError"><code class="xref py py-class docutils literal notranslate"><span class="pre">ceterach.exceptions.CeterachError</span></code></a></p>
+<p>Attempted to do something to the page under the assumption that it was
+a redirect, but it is not a redirect, so it didn’t work.</p>
+</dd></dl>
+
+<dl class="exception">
+<dt id="ceterach.exceptions.SpamFilterError">
+<em class="property">exception </em><code class="descclassname">ceterach.exceptions.</code><code class="descname">SpamFilterError</code><span class="sig-paren">(</span><em>message</em>, <em>code=None</em><span class="sig-paren">)</span><a class="headerlink" href="#ceterach.exceptions.SpamFilterError" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#ceterach.exceptions.FilterError" title="ceterach.exceptions.FilterError"><code class="xref py py-class docutils literal notranslate"><span class="pre">ceterach.exceptions.FilterError</span></code></a></p>
+<p>MediaWiki spam filter blocked the edit.</p>
+</dd></dl>
+
+</div>
+</div>
+</div>
+<div class="section" id="indices-and-tables">
+<h2>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></li>
+<li><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></li>
+<li><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></li>
+</ul>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html#document-index">ceterach</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="index.html#document-api">api module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="index.html#document-page">page module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="index.html#document-user">user module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="index.html#document-revision">revision module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="index.html#document-file">file module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="index.html#document-category">category module</a></li>
+<li class="toctree-l1"><a class="reference internal" href="index.html#document-exceptions">exceptions module</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html#document-index">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2018, Riamse.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.11</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>
