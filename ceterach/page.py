@@ -43,10 +43,10 @@ class Page:
 
     def __init__(self, api, title='', pageid=0, follow_redirects=False):
         self._api = api
-        if pageid is 0 and title is '':
+        if pageid == 0 and title == '':
             err = "You must specify either the 'title' or 'pageid' parameters"
             raise TypeError(err)
-        elif pageid is not 0 and title is not '':
+        elif pageid != 0 and title != '':
             err = "You cannot specify both the 'title' and 'pageid' parameters"
             raise TypeError(err)
         self._title = title

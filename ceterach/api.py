@@ -56,7 +56,7 @@ class MediaWiki:
 #    def __init__(self, api_url="http://wiki.mako.cc/api.php", config=None): # 1.19
 #    def __init__(self, api_url="http://test.wikipedia.org/w/api.php", config=None): # newest
 #    def __init__(self, api_url="http://localhost:8080/srv/mediawiki/api.php", config=None): # 1.20
-        """*api_url* is the full url to the wiki's API (default:
+        r"""*api_url* is the full url to the wiki's API (default:
         ``"http://en.wikipedia.org/w/api.php"``).
 
         *config* is a dictionary whose keys are:
