@@ -30,9 +30,9 @@ class CeterachError(Exception):
 
     def __init__(self, message, code=None, response=None):
         self.msg = message
-        if code or isinstance(message, CeterachError):
+        if isinstance(message, CeterachError):
             self.code = code or message.code
-        self.response = response
+            self.response = response or message.response
         super().__init__(message)
 
     def __str__(self):
