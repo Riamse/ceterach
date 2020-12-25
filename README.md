@@ -1,5 +1,7 @@
 # ceterach
 
+[![Documentation Status](https://readthedocs.org/projects/ceterach/badge/?version=latest)](http://ceterach.readthedocs.io/?badge=latest)
+
 Rather than attempting the impossible task of being a full service,
 e.g. [EarwigBot](http://github.com/earwig/earwigbot/), ceterach aims to be a
 simple modular toolkit. ceterach tries to strike the balance between being a
