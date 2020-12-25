@@ -23,7 +23,7 @@ class CeterachError(Exception):
 
     :param message: The message, stored in ``self.msg``
     :param code: The error code, stored in ``self.code``
-    :param response: The response that the API returned, stored
+    :param response: Any extra details about the error, stored
                      in ``self.response``
     """
     code = "py"
