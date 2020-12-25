@@ -212,6 +212,7 @@ class MediaWiki:
                 code = 'py'
             else:
                 code = ret["error"].get("code", "py")
+                raiseme.response = ret
             raiseme.code = code
             raise raiseme
         return ret

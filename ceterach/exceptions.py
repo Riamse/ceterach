@@ -23,13 +23,16 @@ class CeterachError(Exception):
 
     :param message: The message, stored in ``self.msg``
     :param code: The error code, stored in ``self.code``
+    :param response: The response that the API returned, stored
+                     in ``self.response``
     """
     code = "py"
 
-    def __init__(self, message, code=None):
+    def __init__(self, message, code=None, response=None):
         self.msg = message
         if code or isinstance(message, CeterachError):
             self.code = code or message.code
+        self.response = response
         super().__init__(message)
 
     def __str__(self):
