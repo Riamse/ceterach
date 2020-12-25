@@ -29,11 +29,11 @@ class CeterachError(Exception):
     code = "py"
 
     def __init__(self, message, code=None, response=None):
+        super().__init__(message)
         self.msg = message
         if isinstance(message, CeterachError):
             self.code = code or message.code
             self.response = response or message.response
-        super().__init__(message)
 
     def __str__(self):
         return ": ".join(map(repr, [self.code, self.msg]))
