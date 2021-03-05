@@ -66,6 +66,15 @@ language = None
 # This pattern also affects html_static_path and html_extra_path.
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 
+# A list of paths that contain extra files not directly related to the
+# documentation, such as robots.txt or .htaccess. Relative paths are taken as
+# relative to the configuration directory. They are copied to the output
+# directory. They will overwrite any existing file of the same name.
+#
+# As these files are not meant to be built, they are automatically excluded
+# from source files.
+html_extra_path = ['robots.txt']
+
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = None
 
