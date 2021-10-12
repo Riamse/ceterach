@@ -173,13 +173,10 @@ class Page:
         ident_s = self.identity()
         ident = {k[:-1]: v for (k, v) in ident_s.items()}
         try:
-            token = self._api.tokens['edit']
+            token = self._api.tokens['csrf']
         except KeyError:
-            self._api.set_token("edit")
-            token = self._api.tokens.get('edit', None)
-            if token is None:
-                err = "You do not have the edit permission"
-                raise exc.PermissionsError(err)
+            self._api.set_token("csrf")
+            token = self._api.tokens['csrf']
         edit_params = dict(
             action="edit", text=content, token=token,
             summary=summary, **ident
@@ -375,19 +372,18 @@ class Page:
         :param redirect: Leave a redirect behind, if set to True.
         :returns: A dictionary containing the API query result.
         """
+        try:
+            token = self._api.tokens['csrf']
+        except KeyError:
+            self._api.set_token("csrf")
+            token = self._api.tokens['csrf']
         move_params = {
             "action": "move", "from": self.title,
             "to": target, "reason": reason,
             "movetalk": talk, "movesubpages": subpages,
-            "noredirect": not redirect,
+            "noredirect": not redirect, "token": token,
         }
         move_params = {k: v for (k, v) in move_params.items() if v}
-        move_params['token'] = self._api.tokens['move']
-        if move_params['token'] is None:
-            self._api.set_token("move")
-            if move_params['token'] is None:
-                err = "You do not have the move permission"
-                raise exc.PermissionsError(err)
         #allowed = ("movetalk", "movesubpages", "noredirect", "watch", "unwatch")
         return self._api.call(move_params)
 
@@ -401,13 +397,12 @@ class Page:
         stuff = {"action": "delete", "title": self.title}
         if reason:
             stuff['reason'] = reason
-        stuff['token'] = self._api.tokens['delete']
-        if not stuff['token']:
-            self._api.set_token("delete")
-            if not self._api.tokens['delete']:
-                err = "You do not have the delete permission"
-                raise exc.PermissionsError(err)
-            stuff['token'] = self._api.tokens['delete']
+        try:
+            token = self._api.tokens['csrf']
+        except KeyError:
+            self._api.set_token("csrf")
+            token = self._api.tokens['csrf']
+        stuff['token'] = token
         return self._api.call(stuff)
 
     def undelete(self, reason=""):
@@ -420,13 +415,12 @@ class Page:
         stuff = {"action": "undelete", "title": self.title}
         if reason:
             stuff['reason'] = reason
-        stuff['token'] = self._api.tokens['undelete']
-        if not stuff['token']:
-            self._api.set_token("undelete")
-            if not self._api.tokens['undelete']:
-                err = "You do not have the delete permission"
-                raise exc.PermissionsError(err)
-            stuff['token'] = self._api.tokens['undelete']
+        try:
+            token = self._api.tokens['csrf']
+        except KeyError:
+            self._api.set_token("csrf")
+            token = self._api.tokens['csrf']
+        stuff['token'] = token
         return self._api.call(stuff)
 
     def from_revid(self, revid):

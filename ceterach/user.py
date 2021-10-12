@@ -151,13 +151,10 @@ class User:
             "subject": subject, "text": text
         }
         try:
-            token = self._api.tokens['email']
+            token = self._api.tokens['csrf']
         except KeyError:
-            self._api.set_token("email")
-            token = self._api.tokens.get('email', None)
-            if token is None:
-                err = "You do not have the email permission"
-                raise exc.PermissionsError(err)
+            self._api.set_token("csrf")
+            token = self._api.tokens['csrf']
         params['token'] = token
         if cc:
             params['ccme'] = True
