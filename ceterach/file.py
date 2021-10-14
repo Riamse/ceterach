@@ -78,7 +78,7 @@ class File(Page):
             "watch": watch,
             "ignorewarnings": True,
             "file": contents,
-            "token": self._api.tokens['edit']
+            "token": self._api.tokens['csrf']
         }
         if key:
             post_params['sessionkey'] = key

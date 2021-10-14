@@ -302,30 +302,16 @@ class MediaWiki:
         """Sets the Wiki's ``tokens`` attribute with the tokens specified in
         the *args*.
 
-        If *args* are not specified, they will default to ``'edit'``.
+        If *args* are not specified, they will default to ``'csrf'``.
 
         :param args: Strings that represent token names
         """
         if not args:
-            args = {"edit"}
-        received = set(args)
-        query = {"action": "tokens", "type": received}
-        try:
-            res = self.call(query)
-        except exc.CeterachError:
-            # The wiki does not support action=tokens
-            query = {
-                "prop": "info", "titles": "some random title",
-                "action": "query", "intoken": received
-            }
-            res = self.call(query)['query']['pages']
-            for prop, value in list(res.values())[0].items():
-                if prop.endswith("token"):
-                    self._tokens[prop[:-5]] = value
-        else:
-            # The wiki does support action=tokens
-            for token_name, token_value in res['tokens'].items():
-                self._tokens[token_name[:-5]] = token_value
+            args = {"csrf"}
+        query = {"action": "query", "meta": "tokens", "type": set(args)}
+        res = self.call(query)
+        for token_name, token_value in res['query']['tokens'].items():
+            self._tokens[token_name[:-5]] = token_value
 
     def expand_templates(self, title, text, include_comments=False) -> str:
         """Evaluate the templates in *text* and return the processed result.
